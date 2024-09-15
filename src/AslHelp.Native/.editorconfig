@@ -1,0 +1,8 @@
+[Eglib/**/*.cs]
+file_header_template = Generated from Unity 2017.1 Eglib headers using ClangSharpPInvokeGenerator.\n\nhttps://github.com/Unity-Technologies/mono\nhttps://github.com/dotnet/ClangSharp
+
+[Glibc/**/*.cs]
+file_header_template = Generated from glibc headers using ClangSharpPInvokeGenerator.\n\nhttps://sourceware.org/git/glibc.git\nhttps://github.com/dotnet/ClangSharp
+
+[Mono/**/*.cs]
+file_header_template = Generated from Unity 2017.1 Mono headers using ClangSharpPInvokeGenerator.\n\nhttps://github.com/Unity-Technologies/mono\nhttps://github.com/dotnet/ClangSharp
