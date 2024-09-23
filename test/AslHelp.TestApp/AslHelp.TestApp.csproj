@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(SrcPath)\AslHelp.Shared\AslHelp.Shared.csproj" />
+    <ProjectReference Include="$(SharedPath)\AslHelp.Api\AslHelp.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

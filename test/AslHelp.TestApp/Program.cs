@@ -1,32 +1,59 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO.Pipes;
 using System.Linq;
-using System.Threading;
+using System.Text.Json;
+using System.Threading.Tasks;
 
-using AslHelp.Shared;
+using AslHelp.Api;
+using AslHelp.Api.Requests;
+using AslHelp.Api.Responses;
 
 using Reloaded.Injector;
 
 const string DllPath = @"D:\Code\Projects\.just-ero\asl-help-v3\artifacts\publish\AslHelp.Native\release_win-x86\AslHelp.Native.dll";
 
+Console.WriteLine("Connecting to game...");
+
 using var game = Process.GetProcessesByName("ElenaTemple").Single();
+
+Console.WriteLine($"  => Connected to game: {game.ProcessName} ({game.Id})");
+Console.WriteLine("Injecting...");
+
 using var injector = new Injector(game);
-
 var handle = injector.Inject(DllPath);
-Console.WriteLine($"Handle: {handle:X}");
 
-var ret = injector.CallFunction(DllPath, NativeApi.StartListener, 0);
-Console.WriteLine($"Return: {ret:X}");
+Console.WriteLine($"  => Injected: {handle:X}");
+Console.WriteLine($"Calling {ApiResourceStrings.ApiEntryPoint}...");
 
-using var client = Pipes.Sender;
-var endpoint = Connections.SenderEndpoint;
+var entryPointReturnValue = injector.CallFunction(DllPath, ApiResourceStrings.ApiEntryPoint, 0);
 
-client.Connect(endpoint);
+Console.WriteLine($"  => {ApiResourceStrings.ApiEntryPoint} returned: {entryPointReturnValue}");
+Console.WriteLine("Connecting to named pipe...");
 
-Thread.Sleep(1000);
-client.Send([0], 1);
+using var pipe = new NamedPipeClientStream(".", "asl-help");
+await pipe.ConnectAsync();
 
-Console.WriteLine("Sent command 0");
-System.Console.WriteLine(nameof(nint));
+Console.WriteLine("  => Connected.");
+Console.WriteLine($"Sending request: {RequestCode.None}");
+
+await serialize(RequestCode.None);
+
+Console.WriteLine($"Sending request: {RequestCode.Close}");
+
+await serialize(RequestCode.Close);
+var response = await deserialize<ResponseCode>();
+
+Console.WriteLine($"  => Received response: {response}");
 
 injector.Eject(DllPath);
+
+async Task<T?> deserialize<T>()
+{
+    return (T?)await JsonSerializer.DeserializeAsync(pipe, typeof(T), ApiSerializerContext.Default);
+}
+
+Task serialize<T>(T value)
+{
+    return JsonSerializer.SerializeAsync(pipe, value, typeof(T), ApiSerializerContext.Default);
+}

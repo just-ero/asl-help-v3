@@ -12,11 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(SrcPath)\AslHelp.Collections\AslHelp.Collections.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.HighPerformance" Version="7.1.2" PrivateAssets="all" />
     <PackageReference Include="System.Memory" Version="4.5.4" PrivateAssets="all" />
   </ItemGroup>
 

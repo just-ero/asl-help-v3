@@ -2,24 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-
-    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
   <ItemGroup>
-    <Protobuf Include="proto\*.proto" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="$(SrcPath)\AslHelp.Collections\AslHelp.Collections.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.HighPerformance" Version="7.1.2" PrivateAssets="all" />
-    <PackageReference Include="Google.Protobuf" Version="3.28.2" />
-    <PackageReference Include="Grpc.Core" Version="2.46.6" />
-    <PackageReference Include="Grpc.Tools" Version="2.66.0" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Json" Version="8.0.4" />
   </ItemGroup>
 
 </Project>
