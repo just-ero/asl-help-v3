@@ -18,8 +18,8 @@ Console.WriteLine($"Handle: {handle:X}");
 var ret = injector.CallFunction(DllPath, NativeApi.StartListener, 0);
 Console.WriteLine($"Return: {ret:X}");
 
-using var client = Udp.Sender;
-var endpoint = Udp.SenderEndpoint;
+using var client = Pipes.Sender;
+var endpoint = Connections.SenderEndpoint;
 
 client.Connect(endpoint);
 
@@ -27,5 +27,6 @@ Thread.Sleep(1000);
 client.Send([0], 1);
 
 Console.WriteLine("Sent command 0");
+System.Console.WriteLine(nameof(nint));
 
 injector.Eject(DllPath);

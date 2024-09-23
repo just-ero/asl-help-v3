@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package asl_help.api.protobuf;
+
+service Mono {
+  rpc GetImage (MonoImageRequest) returns (MonoImageResponse);
+}
+
+message MonoImageRequest {
+  string file_or_path = 1;
+}
+
+message MonoImageResponse {
+  uint64 address = 1;
+}

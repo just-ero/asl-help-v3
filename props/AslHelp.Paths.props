@@ -1,10 +1,12 @@
 <Project>
 
   <PropertyGroup>
-    <RootPath>$(MSBuildThisFileDirectory)..</RootPath>
+    <RootPath>$(MSBuildThisFileDirectory)\..</RootPath>
 
     <ImplPath>$(RootPath)\impl</ImplPath>
     <LibPath>$(RootPath)\lib</LibPath>
+    <NativePath>$(RootPath)\native</NativePath>
+    <SharedPath>$(RootPath)\shared</SharedPath>
     <SrcPath>$(RootPath)\src</SrcPath>
     <TestPath>$(RootPath)\test</TestPath>
 
