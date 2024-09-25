@@ -6,8 +6,10 @@ using AslHelp.Api.Responses;
 namespace AslHelp.Api;
 
 [JsonSerializable(typeof(RequestCode))]
-[JsonSerializable(typeof(MonoImageRequest))]
+[JsonSerializable(typeof(GetMonoImageRequest))]
+[JsonSerializable(typeof(GetMonoClassRequest))]
 
 [JsonSerializable(typeof(ResponseCode))]
-[JsonSerializable(typeof(MonoImageResponse))]
-public sealed partial class ApiSerializerContext : JsonSerializerContext;
+[JsonSerializable(typeof(GetMonoImageResponse))]
+[JsonSerializable(typeof(GetMonoClassResponse))]
+internal sealed partial class ApiSerializerContext : JsonSerializerContext;

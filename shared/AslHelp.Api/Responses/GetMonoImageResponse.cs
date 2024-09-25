@@ -1,7 +1,7 @@
 namespace AslHelp.Api.Responses;
 
-public sealed record MonoImageResponse(
+public record GetMonoImageResponse(
     ulong Address,
     string Name,
     string ModuleName,
-    string FileName);
+    string FileName) : IPacket;

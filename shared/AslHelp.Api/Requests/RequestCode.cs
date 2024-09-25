@@ -2,7 +2,7 @@ namespace AslHelp.Api.Requests;
 
 public enum RequestCode
 {
-    None,
+    Unknown,
 
     GetMonoImage,
     GetMonoClass,

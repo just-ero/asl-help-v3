@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AslHelp.TestApp", "test\Asl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AslHelp.Api", "shared\AslHelp.Api\AslHelp.Api.csproj", "{0296F547-ED12-482B-AAC3-E09B39A1CEFE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AslHelp.IO", "src\AslHelp.IO\AslHelp.IO.csproj", "{D604C6B3-F5F3-4C61-A596-C9B3525ED120}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{0296F547-ED12-482B-AAC3-E09B39A1CEFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0296F547-ED12-482B-AAC3-E09B39A1CEFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0296F547-ED12-482B-AAC3-E09B39A1CEFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D604C6B3-F5F3-4C61-A596-C9B3525ED120}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D604C6B3-F5F3-4C61-A596-C9B3525ED120}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D604C6B3-F5F3-4C61-A596-C9B3525ED120}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D604C6B3-F5F3-4C61-A596-C9B3525ED120}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -57,6 +63,7 @@ Global
 		{1885DBA9-8D38-4F5D-94D5-7DF3E0DA16E8} = {05254970-99EA-4F29-A984-CCCC8A62B5EB}
 		{373FBEB3-BD5C-4FC3-96E6-CE10F1940E40} = {F0C36E76-C423-4ED5-BA5C-813E6F8FF0AA}
 		{0296F547-ED12-482B-AAC3-E09B39A1CEFE} = {86F13652-8AD2-4975-9343-78858C4190C9}
+		{D604C6B3-F5F3-4C61-A596-C9B3525ED120} = {05254970-99EA-4F29-A984-CCCC8A62B5EB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {91616496-374D-4FED-B32C-BE1FB8C2BFCC}

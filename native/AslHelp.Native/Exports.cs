@@ -1,109 +1,111 @@
+using System;
 using System.Diagnostics;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
-using System.Text.Json;
+using System.Text;
 using System.Threading.Tasks;
 
 using AslHelp.Api;
 using AslHelp.Api.Requests;
 using AslHelp.Api.Responses;
 using AslHelp.Native.Mono;
+using AslHelp.Native.Mono.Metadata;
+
+using static AslHelp.Api.ApiSerializer;
 
 namespace AslHelp.Native;
 
 internal static partial class Exports
 {
-    private static async Task HandleRequest(RequestCode code)
+    [UnmanagedCallersOnly(EntryPoint = ApiResourceStrings.ApiEntryPoint)]
+    public static unsafe bool ApiEntryPoint()
+    {
+        Task.Run(Main);
+        return true;
+    }
+
+    private static void Main()
+    {
+        using var pipe = new NamedPipeServerStream("asl-help");
+
+        try
+        {
+            Trace.WriteLine("Waiting for connection...");
+            pipe.WaitForConnection();
+
+            while (true)
+            {
+                Trace.WriteLine("Waiting for request...");
+
+                var code = Deserialize<RequestCode>(pipe);
+
+                Trace.WriteLine($"  => Received request: {code}");
+
+                if (code == RequestCode.Close)
+                {
+                    Trace.WriteLine("    => Closing connection...");
+                    break;
+                }
+
+                HandleRequest(pipe, code);
+            }
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine($"  => Exception: {ex}");
+        }
+    }
+
+    private static void HandleRequest(NamedPipeServerStream pipe, RequestCode code)
     {
         switch (code)
         {
             case RequestCode.GetMonoImage:
-            {
-                Trace.WriteLine("  => Waiting for Mono image request...");
-                if (await Deserialize<MonoImageRequest>() is not { } request)
-                {
-                    Trace.WriteLine("     => Invalid request...");
-                    await Serialize(ResponseCode.ErrInvalidRequest);
-                    return;
-                }
-
-                Trace.WriteLine($"     => Received Mono image request: {request}");
-
-                var response = new MonoImageResponse(
-                    Address: MonoApi.mono_image_loaded(request.NameOrPath),
-                    Name: request.NameOrPath,
-                    ModuleName: $"{request.NameOrPath}.dll",
-                    FileName: request.NameOrPath);
-
-                Trace.WriteLine($"  => Sending Mono image response: {response}");
-
-                await Serialize(ResponseCode.Success);
-                await Serialize(response);
-
-                Trace.WriteLine("     => Sent Mono image response.");
-
+                GetMonoImage(pipe);
                 break;
-            }
-
-            case RequestCode.None:
-            {
+            case RequestCode.GetMonoClass:
+                GetMonoClass(pipe);
                 break;
-            }
-
             default:
-            {
-                Trace.WriteLine("  => Invalid request...");
-                await Serialize(ResponseCode.ErrInvalidRequest);
+                Serialize(pipe, ResponseCode.UnknownRequest);
                 break;
-            }
         }
     }
 
-    private static async Task Main()
+    private static unsafe void GetMonoImage(NamedPipeServerStream pipe)
     {
-        Trace.WriteLine("  => Waiting for connection...");
-        await _pipe.WaitForConnectionAsync();
-
-        Trace.WriteLine("     => Connected!");
-
-        while (true)
+        if (ReceivePacket<GetMonoImageRequest>(pipe) is { } request)
         {
-            Trace.WriteLine("  => Waiting for request...");
-            var code = await Deserialize<RequestCode>();
+            Trace.WriteLine($"    => Requested image: {request.NameOrPath}");
 
-            Trace.WriteLine($"     => Received request: {code}");
+            var img = MonoApi.mono_image_loaded(request.NameOrPath);
+            var response = new GetMonoImageResponse(
+                Address: (ulong)img,
+                Name: GetString(img->AssemblyName),
+                ModuleName: GetString(img->ModuleName),
+                FileName: GetString(img->Name));
 
-            if (code == RequestCode.Close)
-            {
-                Trace.WriteLine("  => Closing connection...");
-                break;
-            }
-
-            await HandleRequest(code);
+            SendPacket(pipe, response);
         }
     }
 
-    [UnmanagedCallersOnly(EntryPoint = ApiResourceStrings.ApiEntryPoint)]
-    public static unsafe bool ApiEntryPoint()
+    private static unsafe void GetMonoClass(NamedPipeServerStream pipe)
     {
-        Trace.WriteLine($"Entered {ApiResourceStrings.ApiEntryPoint}.");
+        if (ReceivePacket<GetMonoClassRequest>(pipe) is { } request)
+        {
+            Trace.WriteLine($"  => Requested class: {request.Name}");
 
-        Task.Run(Main);
+            var klass = MonoApi.mono_class_from_name_case((MonoImage*)request.Image, request.Namespace, request.Name);
+            var response = new GetMonoClassResponse(
+                Address: (ulong)klass);
 
-        Trace.WriteLine("Started main task.");
-
-        return true;
+            SendPacket(pipe, response);
+        }
     }
 
-    private static readonly NamedPipeServerStream _pipe = new("asl-help");
-
-    private static async Task<T?> Deserialize<T>()
+    private static unsafe string GetString(sbyte* bytes)
     {
-        return (T?)await JsonSerializer.DeserializeAsync(_pipe, typeof(T), ApiSerializerContext.Default);
-    }
-
-    private static Task Serialize<T>(T value)
-    {
-        return JsonSerializer.SerializeAsync(_pipe, value, typeof(T), ApiSerializerContext.Default);
+        var span = MemoryMarshal.CreateReadOnlySpanFromNullTerminated((byte*)bytes);
+        return Encoding.UTF8.GetString(span);
     }
 }
