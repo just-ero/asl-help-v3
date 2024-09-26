@@ -1,12 +1,11 @@
 using AslHelp.Api.Responses;
-using AslHelp.Shared.Extensions;
 using AslHelp.Shared.Results.Errors;
 
 namespace AslHelp.Api.Errors;
 
 internal sealed record ApiError : ResultError
 {
-    public ApiError(string message)
+    private ApiError(string message)
         : base(message) { }
 
     public static ApiError Other(string message)
@@ -16,9 +15,25 @@ internal sealed record ApiError : ResultError
 
     public static ApiError FromResponseCode(ResponseCode responseCode)
     {
-        var attr = responseCode.GetAttribute<ResponseCode, ApiErrorMessageAttribute>();
-        return attr is not null
-            ? new(attr.Message)
-            : new($"Unknown response code '{responseCode}'.");
+        return responseCode switch
+        {
+            ResponseCode.Unknown => Unknown,
+            ResponseCode.Ok => Ok,
+            ResponseCode.UnknownRequest => UnknownRequest,
+            ResponseCode.InvalidRequest => InvalidRequest,
+            _ => new($"Server responded '{responseCode}'.")
+        };
     }
+
+    public static ApiError Unknown
+        => new("Unknown error.");
+
+    public static ApiError Ok
+        => new("Request was successful.");
+
+    public static ApiError UnknownRequest
+        => new("Request code was not known by the server.");
+
+    public static ApiError InvalidRequest
+        => new("Request was null or otherwise invalid.");
 }

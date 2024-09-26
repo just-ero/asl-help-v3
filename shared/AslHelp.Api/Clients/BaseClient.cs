@@ -1,6 +1,9 @@
 using System;
 using System.IO.Pipes;
 
+using AslHelp.Api.Requests;
+using AslHelp.Api.Responses;
+
 namespace AslHelp.Api.Clients;
 
 public abstract class BaseClient : IDisposable
@@ -15,7 +18,17 @@ public abstract class BaseClient : IDisposable
         _pipe = new(".", pipeName, PipeDirection.InOut, options);
     }
 
-    public void Connect(int timeout = 0)
+    public void SendRequest(RequestCode code)
+    {
+        ApiSerializer.Serialize(_pipe, code);
+    }
+
+    public ResponseCode ReceiveResponse()
+    {
+        return ApiSerializer.Deserialize<ResponseCode>(_pipe);
+    }
+
+    public void Connect(int timeout = -1)
     {
         _pipe.Connect(timeout);
     }

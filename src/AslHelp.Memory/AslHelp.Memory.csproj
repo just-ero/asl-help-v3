@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Memory" Version="4.5.4" />
+    <ProjectReference Include="$(SharedPath)\AslHelp.Shared\AslHelp.Shared.csproj" />
   </ItemGroup>
 
 </Project>

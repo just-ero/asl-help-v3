@@ -1,38 +1,35 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO.Pipes;
 using System.Linq;
 
 using AslHelp.Api;
+using AslHelp.Api.Clients;
 using AslHelp.Api.Requests;
-using AslHelp.Api.Responses;
+using AslHelp.Memory.Native;
 
 using Reloaded.Injector;
-
-using static AslHelp.Api.ApiSerializer;
 
 const string DllPath = @"D:\Code\Projects\.just-ero\asl-help-v3\artifacts\publish\AslHelp.Native\release_win-x86\AslHelp.Native.dll";
 
 using var game = Process.GetProcessesByName("ElenaTemple").Single();
 
-using var injector = new Injector(game);
-var handle = injector.Inject(DllPath);
+var handle = game.Inject(DllPath);
+Console.WriteLine($"{handle:X}");
 
-var entryPointReturnValue = injector.CallFunction(DllPath, ApiResourceStrings.ApiEntryPoint, 0);
+// using var injector = new Injector(game);
+// var handle = injector.Inject(DllPath);
 
-using var pipe = new NamedPipeClientStream(".", "asl-help");
-pipe.Connect();
+// var entryPointReturnValue = injector.CallFunction(DllPath, ApiResourceStrings.ApiEntryPoint, 0);
 
-SendPacket(pipe, RequestCode.GetMonoImage, new GetMonoImageRequest("Assembly-CSharp"));
-var monoImage = ReceivePacket<GetMonoImageResponse>(pipe);
+// using var client = new MonoClient(ApiResourceStrings.PipeName);
+// client.Connect();
 
-Console.WriteLine(monoImage);
+// var monoImageResponse = client.GetMonoImage(new("Assembly-CSharp")).Unwrap();
+// Console.WriteLine(monoImageResponse.Format());
 
-SendPacket(pipe, RequestCode.GetMonoClass, new GetMonoClassRequest(monoImage!.Address, "", "Player"));
-var monoClass = ReceivePacket<GetMonoClassResponse>(pipe);
+// var monoClassResponse = client.GetMonoClass(new(monoImageResponse.Address, "", "Player")).Unwrap();
+// Console.WriteLine(monoClassResponse.Format());
 
-Console.WriteLine(monoClass);
+// client.SendRequest(RequestCode.Close);
 
-Serialize(pipe, RequestCode.Close);
-
-injector.Eject(DllPath);
+// injector.Eject(DllPath);

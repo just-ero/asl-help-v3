@@ -1,7 +1,6 @@
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json;
 
@@ -9,22 +8,22 @@ using AslHelp.Api.Responses;
 
 namespace AslHelp.Api;
 
-public static class ApiSerializer
+internal static class ApiSerializer
 {
     public static ResponseCode SendPacket<T>(Stream stream, T request)
-        where T : IPacket
+        where T : IApiPacket
     {
         Serialize(stream, request);
         return Deserialize<ResponseCode>(stream);
     }
 
     public static T? ReceivePacket<T>(Stream stream)
-        where T : IPacket
+        where T : IApiPacket
     {
         var request = Deserialize<T>(stream);
         if (request is null)
         {
-            Serialize(stream, ResponseCode.NullPacket);
+            Serialize(stream, ResponseCode.InvalidRequest);
             return default;
         }
 
@@ -51,7 +50,8 @@ public static class ApiSerializer
         var rented = ArrayPool<byte>.Shared.Rent(sizeof(int));
         if (stream.Read(rented, 0, sizeof(int)) != sizeof(int))
         {
-            ThrowEndOfStreamException();
+            ArrayPool<byte>.Shared.Return(rented);
+            return default;
         }
 
         var length = BinaryPrimitives.ReadInt32LittleEndian(rented);
@@ -60,18 +60,13 @@ public static class ApiSerializer
         var buffer = ArrayPool<byte>.Shared.Rent(length);
         if (stream.Read(buffer, 0, length) != length)
         {
-            ThrowEndOfStreamException();
+            ArrayPool<byte>.Shared.Return(buffer);
+            return default;
         }
 
         var value = JsonSerializer.Deserialize(buffer.AsSpan(0, length), typeof(T), ApiSerializerContext.Default);
         ArrayPool<byte>.Shared.Return(buffer);
 
         return (T?)value;
-    }
-
-    [DoesNotReturn]
-    private static void ThrowEndOfStreamException()
-    {
-        throw new EndOfStreamException("The stream didn't contain enough data to read the requested item.");
     }
 }

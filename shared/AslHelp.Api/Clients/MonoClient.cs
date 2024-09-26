@@ -9,14 +9,8 @@ namespace AslHelp.Api.Clients;
 
 public sealed class MonoClient : BaseClient
 {
-    public MonoClient()
-        : base(ApiResourceStrings.PipeName) { }
-
     public MonoClient(string pipeName)
         : base(pipeName, PipeOptions.None) { }
-
-    public MonoClient(PipeOptions options)
-        : base(ApiResourceStrings.PipeName, options) { }
 
     public MonoClient(string pipeName, PipeOptions options)
         : base(pipeName, options) { }
@@ -31,7 +25,7 @@ public sealed class MonoClient : BaseClient
             var response = ApiSerializer.ReceivePacket<GetMonoImageResponse>(_pipe);
             return response is not null
                 ? response
-                : ApiError.FromResponseCode(ResponseCode.NullPacket);
+                : ApiError.FromResponseCode(ResponseCode.InvalidRequest);
         }
 
         return ApiError.FromResponseCode(responseCode);
@@ -47,7 +41,7 @@ public sealed class MonoClient : BaseClient
             var response = ApiSerializer.ReceivePacket<GetMonoClassResponse>(_pipe);
             return response is not null
                 ? response
-                : ApiError.FromResponseCode(ResponseCode.NullPacket);
+                : ApiError.FromResponseCode(ResponseCode.InvalidRequest);
         }
 
         return ApiError.FromResponseCode(responseCode);

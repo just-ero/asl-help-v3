@@ -1,4 +1,7 @@
 namespace AslHelp.Api.Requests;
 
-public sealed record GetMonoImageRequest(
-    string NameOrPath) : IPacket;
+public sealed class GetMonoImageRequest(
+    string nameOrPath) : IApiPacket
+{
+    public string NameOrPath { get; } = nameOrPath;
+}

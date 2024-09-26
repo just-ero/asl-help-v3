@@ -1,4 +1,7 @@
 namespace AslHelp.Api.Responses;
 
-public sealed record GetMonoClassResponse(
-    ulong Address) : IPacket;
+public sealed class GetMonoClassResponse(
+    ulong address) : IApiPacket
+{
+    public ulong Address { get; } = address;
+}

@@ -1,6 +1,6 @@
 using System;
 using System.Diagnostics;
-using System.IO.Pipes;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,10 +8,11 @@ using System.Threading.Tasks;
 using AslHelp.Api;
 using AslHelp.Api.Requests;
 using AslHelp.Api.Responses;
+using AslHelp.Api.Servers;
 using AslHelp.Native.Mono;
 using AslHelp.Native.Mono.Metadata;
 
-using static AslHelp.Api.ApiSerializer;
+[module: SkipLocalsInit]
 
 namespace AslHelp.Native;
 
@@ -26,19 +27,22 @@ internal static partial class Exports
 
     private static void Main()
     {
-        using var pipe = new NamedPipeServerStream("asl-help");
+        using var server = new MonoServer(ApiResourceStrings.PipeName)
+        {
+            GetMonoImageHandler = GetMonoImage,
+            GetMonoClassHandler = GetMonoClass
+        };
 
         try
         {
             Trace.WriteLine("Waiting for connection...");
-            pipe.WaitForConnection();
+            server.WaitForConnection();
+            Trace.WriteLine("  => Connected!");
 
             while (true)
             {
                 Trace.WriteLine("Waiting for request...");
-
-                var code = Deserialize<RequestCode>(pipe);
-
+                var code = server.ReceiveRequest();
                 Trace.WriteLine($"  => Received request: {code}");
 
                 if (code == RequestCode.Close)
@@ -47,60 +51,50 @@ internal static partial class Exports
                     break;
                 }
 
-                HandleRequest(pipe, code);
+                server.ProcessRequest(code);
             }
         }
         catch (Exception ex)
         {
-            Trace.WriteLine($"  => Exception: {ex}");
+            Trace.WriteLine($"""
+                Main loop threw an exception:
+                {ex}
+                """);
         }
     }
 
-    private static void HandleRequest(NamedPipeServerStream pipe, RequestCode code)
+    private static unsafe GetMonoImageResponse GetMonoImage(GetMonoImageRequest request)
     {
-        switch (code)
-        {
-            case RequestCode.GetMonoImage:
-                GetMonoImage(pipe);
-                break;
-            case RequestCode.GetMonoClass:
-                GetMonoClass(pipe);
-                break;
-            default:
-                Serialize(pipe, ResponseCode.UnknownRequest);
-                break;
-        }
+        Trace.WriteLine($"    => Loading image: {request.NameOrPath}");
+
+        var img = MonoApi.mono_image_loaded(request.NameOrPath);
+
+        Trace.WriteLine($"      => Image loaded!");
+        Trace.WriteLine($"        => Address: 0x{(ulong)img:X}");
+        Trace.WriteLine($"        => File: {GetString(img->Name)}");
+
+        return new(
+            address: (ulong)img,
+            name: GetString(img->AssemblyName),
+            moduleName: GetString(img->ModuleName),
+            fileName: GetString(img->Name));
     }
 
-    private static unsafe void GetMonoImage(NamedPipeServerStream pipe)
+    private static unsafe GetMonoClassResponse GetMonoClass(GetMonoClassRequest request)
     {
-        if (ReceivePacket<GetMonoImageRequest>(pipe) is { } request)
-        {
-            Trace.WriteLine($"    => Requested image: {request.NameOrPath}");
+        var fullName = string.IsNullOrEmpty(request.Namespace)
+            ? request.Name
+            : $"{request.Namespace}.{request.Name}";
 
-            var img = MonoApi.mono_image_loaded(request.NameOrPath);
-            var response = new GetMonoImageResponse(
-                Address: (ulong)img,
-                Name: GetString(img->AssemblyName),
-                ModuleName: GetString(img->ModuleName),
-                FileName: GetString(img->Name));
+        Trace.WriteLine($"    => Loading class: {fullName}");
 
-            SendPacket(pipe, response);
-        }
-    }
+        var klass = MonoApi.mono_class_from_name_case((MonoImage*)request.Image, request.Namespace, request.Name);
 
-    private static unsafe void GetMonoClass(NamedPipeServerStream pipe)
-    {
-        if (ReceivePacket<GetMonoClassRequest>(pipe) is { } request)
-        {
-            Trace.WriteLine($"  => Requested class: {request.Name}");
+        Trace.WriteLine($"      => Class loaded!");
+        Trace.WriteLine($"        => Address: 0x{(ulong)klass:X}");
 
-            var klass = MonoApi.mono_class_from_name_case((MonoImage*)request.Image, request.Namespace, request.Name);
-            var response = new GetMonoClassResponse(
-                Address: (ulong)klass);
-
-            SendPacket(pipe, response);
-        }
+        return new(
+            address: (ulong)klass);
     }
 
     private static unsafe string GetString(sbyte* bytes)

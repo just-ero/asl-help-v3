@@ -1,6 +1,11 @@
 namespace AslHelp.Api.Requests;
 
-public sealed record GetMonoClassRequest(
-    ulong Image,
-    string Namespace,
-    string Name) : IPacket;
+public sealed class GetMonoClassRequest(
+    ulong image,
+    string @namespace,
+    string name) : IApiPacket
+{
+    public ulong Image { get; } = image;
+    public string Namespace { get; } = @namespace;
+    public string Name { get; } = name;
+}
