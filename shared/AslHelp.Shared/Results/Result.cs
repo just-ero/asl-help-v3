@@ -42,7 +42,7 @@ public readonly struct Result : IResult
         {
             if (result is { IsErr: true, Error: { } err })
             {
-                return Result.Err(err);
+                return Err(err);
             }
         }
 
@@ -101,7 +101,7 @@ public readonly struct Result : IResult
         where TError : IResultError
     {
         return IsErr
-            ? Result.Err(op(Error), this)
+            ? Err(op(Error), this)
             : this;
     }
 

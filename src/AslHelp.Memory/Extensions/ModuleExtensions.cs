@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
+using AslHelp.Memory.Errors;
 using AslHelp.Memory.Native;
 using AslHelp.Memory.Native.Enums;
 using AslHelp.Memory.Native.Structs;
-using AslHelp.Shared;
+using AslHelp.Shared.Results;
+using AslHelp.Shared.Results.Errors;
 
 using Mbi = (
     AslHelp.Memory.Native.Enums.MemoryRangeProtect Protect,
@@ -62,33 +66,33 @@ public static class ModuleExtensions
         } while (address < max);
     }
 
-    public static unsafe DebugSymbol GetSymbol(this Module module, Process process, string symbolName, string? pdbDirectory = null)
+    public static unsafe Result<DebugSymbol> GetSymbol(this Module module, Process process, string symbolName, string? pdbDirectory = null)
     {
         nuint processHandle = (nuint)(nint)process.Handle;
 
         if (!WinInterop.SymInitialize(processHandle, pdbDirectory, false))
         {
-            ThrowHelper.ThrowWin32Exception();
+            return new Win32Exception();
         }
 
         nuint symLoadBase = WinInterop.SymLoadModule(processHandle, 0, module.FileName, null, module.Base, module.MemorySize, null, 0);
 
         if (symLoadBase == 0)
         {
-            ThrowHelper.ThrowWin32Exception();
+            return new Win32Exception();
         }
 
         if (!WinInterop.SymFromName(processHandle, symbolName, out SymbolInfo symbol))
         {
-            ThrowHelper.ThrowWin32Exception();
+            return new Win32Exception();
         }
 
         _ = WinInterop.SymCleanup(processHandle);
 
-        return new(symbol);
+        return new DebugSymbol(symbol);
     }
 
-    public static unsafe List<DebugSymbol> GetSymbols(this Module module, Process process, string? symbolMask = "*", string? pdbDirectory = null)
+    public static unsafe Result<List<DebugSymbol>> GetSymbols(this Module module, Process process, string? symbolMask = "*", string? pdbDirectory = null)
     {
         nuint processHandle = (nuint)(nint)process.Handle;
 
@@ -100,21 +104,23 @@ public static class ModuleExtensions
 
         if (!WinInterop.SymInitialize(processHandle, pdbDirectory, false))
         {
-            ThrowHelper.ThrowWin32Exception();
+            return new Win32Exception();
         }
 
         nuint symLoadBase = WinInterop.SymLoadModule(processHandle, 0, module.FileName, null, module.Base, module.MemorySize, null, 0);
         if (symLoadBase == 0)
         {
-            ThrowHelper.ThrowWin32Exception();
+            WinInterop.SymCleanup(processHandle);
+            return new Win32Exception();
         }
 
         if (!WinInterop.SymEnumSymbols(processHandle, symLoadBase, symbolMask, callback, pSymbols))
         {
-            ThrowHelper.ThrowWin32Exception();
+            WinInterop.SymCleanup(processHandle);
+            return new Win32Exception();
         }
 
-        _ = WinInterop.SymCleanup(processHandle);
+        WinInterop.SymCleanup(processHandle);
 
         return symbols;
 
@@ -124,5 +130,66 @@ public static class ModuleExtensions
 
             return 1;
         }
+    }
+
+    public static Result<uint> CallRemoteFunction<T>(this Module module, Process process, string functionName, T arg)
+        where T : unmanaged
+    {
+        if (!process.Is64Bit()
+            .TryUnwrap(out bool is64Bit, out IResultError? err))
+        {
+            return Result<uint>.Err(err);
+        }
+
+        if (is64Bit)
+        {
+            return module.CallRemoteFunction64(process, functionName, arg);
+        }
+        else
+        {
+            return module.CallRemoteFunction32(process, functionName, arg);
+        }
+    }
+
+    private static unsafe Result<uint> CallRemoteFunction32<T>(this Module module, Process process, string functionName, T arg)
+        where T : unmanaged
+    {
+        if (!module.GetSymbol(process, functionName)
+            .TryUnwrap(out DebugSymbol function, out IResultError? err))
+        {
+            return Result<uint>.Err(err);
+        }
+
+        if (!process.Allocate(&arg, (uint)sizeof(T))
+            .TryUnwrap(out nuint pArg, out err))
+        {
+            return Result<uint>.Err(err);
+        }
+
+        Result<uint> result = process.CreateRemoteThreadAndGetExitCode(function.Address, pArg);
+
+        process.Free(pArg);
+        return result;
+    }
+
+    private static unsafe Result<uint> CallRemoteFunction64<T>(this Module module, Process process, string functionName, T arg)
+        where T : unmanaged
+    {
+        nuint pFunction = WinInterop.GetProcAddress(module.Base, Encoding.UTF8.GetBytes(functionName));
+        if (pFunction == 0)
+        {
+            return MemoryError.FromLastWin32Error();
+        }
+
+        if (!process.Allocate(&arg, (uint)sizeof(T))
+            .TryUnwrap(out nuint pArg, out IResultError? err))
+        {
+            return Result<uint>.Err(err);
+        }
+
+        Result<uint> result = process.CreateRemoteThreadAndGetExitCode(pFunction, pArg);
+
+        process.Free(pArg);
+        return result;
     }
 }

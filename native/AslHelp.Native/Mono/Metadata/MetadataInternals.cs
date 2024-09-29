@@ -136,7 +136,6 @@ internal unsafe partial struct MonoImage
     [InlineArray((int)MonoMetaTable.Num)]
     public struct TablesBuffer
     {
-        private MonoTableInfo _e0;
     }
 }
 

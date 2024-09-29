@@ -40,7 +40,7 @@ internal static partial class Exports
             while (true)
             {
                 Trace.WriteLine("Waiting for request...");
-                var code = server.ReceiveRequest();
+                RequestCode code = server.ReceiveRequest();
                 Trace.WriteLine($"  => Received request: {code}");
 
                 if (code == RequestCode.Close)
@@ -65,7 +65,7 @@ internal static partial class Exports
     {
         Trace.WriteLine($"    => Loading image: {request.NameOrPath}");
 
-        var img = MonoApi.mono_image_loaded(request.NameOrPath);
+        MonoImage* img = MonoApi.mono_image_loaded(request.NameOrPath);
 
         Trace.WriteLine($"      => Image loaded!");
         Trace.WriteLine($"        => Address: 0x{(ulong)img:X}");
@@ -80,13 +80,13 @@ internal static partial class Exports
 
     private static unsafe GetMonoClassResponse GetMonoClass(GetMonoClassRequest request)
     {
-        var fullName = string.IsNullOrEmpty(request.Namespace)
+        string fullName = string.IsNullOrEmpty(request.Namespace)
             ? request.Name
             : $"{request.Namespace}.{request.Name}";
 
         Trace.WriteLine($"    => Loading class: {fullName}");
 
-        var klass = MonoApi.mono_class_from_name_case((MonoImage*)request.Image, request.Namespace, request.Name);
+        void* klass = MonoApi.mono_class_from_name_case((MonoImage*)request.Image, request.Namespace, request.Name);
 
         Trace.WriteLine($"      => Class loaded!");
         Trace.WriteLine($"        => Address: 0x{(ulong)klass:X}");
@@ -97,7 +97,7 @@ internal static partial class Exports
 
     private static unsafe string GetString(sbyte* bytes)
     {
-        var span = MemoryMarshal.CreateReadOnlySpanFromNullTerminated((byte*)bytes);
+        ReadOnlySpan<byte> span = MemoryMarshal.CreateReadOnlySpanFromNullTerminated((byte*)bytes);
         return Encoding.UTF8.GetString(span);
     }
 }

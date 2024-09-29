@@ -1,3 +1,8 @@
+// Generated from Unity 2017.1 Mono headers using ClangSharpPInvokeGenerator.
+//
+// https://github.com/Unity-Technologies/mono
+// https://github.com/dotnet/ClangSharp
+
 namespace AslHelp.Native.Mono.Utils;
 
 /// <remarks>

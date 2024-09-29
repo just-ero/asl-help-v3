@@ -20,7 +20,7 @@ internal static class ApiSerializer
     public static T? ReceivePacket<T>(Stream stream)
         where T : IApiPacket
     {
-        var request = Deserialize<T>(stream);
+        T? request = Deserialize<T>(stream);
         if (request is null)
         {
             Serialize(stream, ResponseCode.InvalidRequest);
@@ -34,9 +34,9 @@ internal static class ApiSerializer
 
     public static void Serialize<T>(Stream stream, T value)
     {
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(value, typeof(T), ApiSerializerContext.Default);
+        byte[] bytes = JsonSerializer.SerializeToUtf8Bytes(value, typeof(T), ApiSerializerContext.Default);
 
-        var rented = ArrayPool<byte>.Shared.Rent(sizeof(int));
+        byte[] rented = ArrayPool<byte>.Shared.Rent(sizeof(int));
         BinaryPrimitives.WriteInt32LittleEndian(rented, bytes.Length);
 
         stream.Write(rented, 0, sizeof(int));
@@ -47,24 +47,24 @@ internal static class ApiSerializer
 
     public static T? Deserialize<T>(Stream stream)
     {
-        var rented = ArrayPool<byte>.Shared.Rent(sizeof(int));
+        byte[] rented = ArrayPool<byte>.Shared.Rent(sizeof(int));
         if (stream.Read(rented, 0, sizeof(int)) != sizeof(int))
         {
             ArrayPool<byte>.Shared.Return(rented);
             return default;
         }
 
-        var length = BinaryPrimitives.ReadInt32LittleEndian(rented);
+        int length = BinaryPrimitives.ReadInt32LittleEndian(rented);
         ArrayPool<byte>.Shared.Return(rented);
 
-        var buffer = ArrayPool<byte>.Shared.Rent(length);
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(length);
         if (stream.Read(buffer, 0, length) != length)
         {
             ArrayPool<byte>.Shared.Return(buffer);
             return default;
         }
 
-        var value = JsonSerializer.Deserialize(buffer.AsSpan(0, length), typeof(T), ApiSerializerContext.Default);
+        object? value = JsonSerializer.Deserialize(buffer.AsSpan(0, length), typeof(T), ApiSerializerContext.Default);
         ArrayPool<byte>.Shared.Return(buffer);
 
         return (T?)value;

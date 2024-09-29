@@ -9,7 +9,7 @@ public static class EnumExtensions
         where TEnum : unmanaged, Enum
         where TAttribute : notnull, Attribute
     {
-        var fieldInfo = typeof(TEnum).GetField(value.ToString());
+        FieldInfo fieldInfo = typeof(TEnum).GetField(value.ToString());
         return fieldInfo.GetCustomAttribute<TAttribute>(false);
     }
 }

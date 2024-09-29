@@ -19,10 +19,10 @@ public sealed class MonoClient : BaseClient
     {
         ApiSerializer.Serialize(_pipe, RequestCode.GetMonoImage);
 
-        var responseCode = ApiSerializer.SendPacket(_pipe, request);
+        ResponseCode responseCode = ApiSerializer.SendPacket(_pipe, request);
         if (responseCode == ResponseCode.Ok)
         {
-            var response = ApiSerializer.ReceivePacket<GetMonoImageResponse>(_pipe);
+            GetMonoImageResponse? response = ApiSerializer.ReceivePacket<GetMonoImageResponse>(_pipe);
             return response is not null
                 ? response
                 : ApiError.FromResponseCode(ResponseCode.InvalidRequest);
@@ -35,10 +35,10 @@ public sealed class MonoClient : BaseClient
     {
         ApiSerializer.Serialize(_pipe, RequestCode.GetMonoClass);
 
-        var responseCode = ApiSerializer.SendPacket(_pipe, request);
+        ResponseCode responseCode = ApiSerializer.SendPacket(_pipe, request);
         if (responseCode == ResponseCode.Ok)
         {
-            var response = ApiSerializer.ReceivePacket<GetMonoClassResponse>(_pipe);
+            GetMonoClassResponse? response = ApiSerializer.ReceivePacket<GetMonoClassResponse>(_pipe);
             return response is not null
                 ? response
                 : ApiError.FromResponseCode(ResponseCode.InvalidRequest);

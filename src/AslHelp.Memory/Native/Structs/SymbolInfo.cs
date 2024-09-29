@@ -92,5 +92,5 @@ internal unsafe struct SymbolInfo
     /// <summary>
     ///     The name of the symbol.
     /// </summary>
-    public fixed ushort Name[1024];
+    public fixed byte Name[1024];
 }
