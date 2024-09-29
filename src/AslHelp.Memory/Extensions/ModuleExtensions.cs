@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -22,9 +22,9 @@ namespace AslHelp.Memory.Extensions;
 
 public static class ModuleExtensions
 {
-    public static IEnumerable<MemoryPage> GetMemoryPages(this Module module, Process process, Func<Mbi, bool>? filter = null)
+    public static IEnumerable<MemoryPage> GetMemoryPages(this Module module, Func<Mbi, bool>? filter = null)
     {
-        nuint processHandle = (nuint)(nint)process.Handle;
+        nuint processHandle = (nuint)(nint)module.Parent.Handle;
         nuint address = module.Base, max = module.Base + module.MemorySize;
 
         do
@@ -66,25 +66,24 @@ public static class ModuleExtensions
         } while (address < max);
     }
 
-    public static unsafe Result<DebugSymbol> GetSymbol(this Module module, Process process, string symbolName, string? pdbDirectory = null)
+    public static unsafe Result<DebugSymbol> GetSymbol(this Module module, string symbolName, string? pdbDirectory = null)
     {
-        nuint processHandle = (nuint)(nint)process.Handle;
-
+        nuint processHandle = (nuint)(nint)module.Parent.Handle;
         if (!WinInterop.SymInitialize(processHandle, pdbDirectory, false))
         {
-            return new Win32Exception();
+            return MemoryError.FromLastWin32Error();
         }
 
         nuint symLoadBase = WinInterop.SymLoadModule(processHandle, 0, module.FileName, null, module.Base, module.MemorySize, null, 0);
 
         if (symLoadBase == 0)
         {
-            return new Win32Exception();
+            return MemoryError.FromLastWin32Error();
         }
 
         if (!WinInterop.SymFromName(processHandle, symbolName, out SymbolInfo symbol))
         {
-            return new Win32Exception();
+            return MemoryError.FromLastWin32Error();
         }
 
         _ = WinInterop.SymCleanup(processHandle);
@@ -92,9 +91,9 @@ public static class ModuleExtensions
         return new DebugSymbol(symbol);
     }
 
-    public static unsafe Result<List<DebugSymbol>> GetSymbols(this Module module, Process process, string? symbolMask = "*", string? pdbDirectory = null)
+    public static unsafe Result<List<DebugSymbol>> GetSymbols(this Module module, string? symbolMask = "*", string? pdbDirectory = null)
     {
-        nuint processHandle = (nuint)(nint)process.Handle;
+        nuint processHandle = (nuint)(nint)module.Parent.Handle;
 
         var callback =
             (delegate* unmanaged[Stdcall]<SymbolInfo*, uint, void*, int>)Marshal.GetFunctionPointerForDelegate(enumSymbolsCallback);
@@ -104,20 +103,20 @@ public static class ModuleExtensions
 
         if (!WinInterop.SymInitialize(processHandle, pdbDirectory, false))
         {
-            return new Win32Exception();
+            return MemoryError.FromLastWin32Error();
         }
 
         nuint symLoadBase = WinInterop.SymLoadModule(processHandle, 0, module.FileName, null, module.Base, module.MemorySize, null, 0);
         if (symLoadBase == 0)
         {
             WinInterop.SymCleanup(processHandle);
-            return new Win32Exception();
+            return MemoryError.FromLastWin32Error();
         }
 
         if (!WinInterop.SymEnumSymbols(processHandle, symLoadBase, symbolMask, callback, pSymbols))
         {
             WinInterop.SymCleanup(processHandle);
-            return new Win32Exception();
+            return MemoryError.FromLastWin32Error();
         }
 
         WinInterop.SymCleanup(processHandle);
@@ -132,47 +131,47 @@ public static class ModuleExtensions
         }
     }
 
-    public static Result<uint> CallRemoteFunction<T>(this Module module, Process process, string functionName, T arg)
-        where T : unmanaged
+    public static Result Eject(this Module module)
     {
-        if (!process.Is64Bit()
-            .TryUnwrap(out bool is64Bit, out IResultError? err))
-        {
-            return Result<uint>.Err(err);
-        }
-
-        if (is64Bit)
-        {
-            return module.CallRemoteFunction64(process, functionName, arg);
-        }
-        else
-        {
-            return module.CallRemoteFunction32(process, functionName, arg);
-        }
+        return module.Parent.GetModule(Lib.Kernel32)
+            .AndThen(kernel32 => kernel32.GetSymbol("FreeLibrary"))
+            .AndThen(sym => module.Parent.CreateRemoteThreadAndGetExitCode(sym.Address, module.Base))
+            .AndThen(exitCode => exitCode != 0
+                ? Result.Ok()
+                : MemoryError.FromLastWin32Error());
     }
 
-    private static unsafe Result<uint> CallRemoteFunction32<T>(this Module module, Process process, string functionName, T arg)
+    public static Result<uint> CallRemoteFunction<T>(this Module module, string functionName, T arg)
         where T : unmanaged
     {
-        if (!module.GetSymbol(process, functionName)
+        return module.Parent.Is64Bit()
+            .AndThen(is64Bit => is64Bit
+                ? module.CallRemoteFunction64(functionName, arg)
+                : module.CallRemoteFunction32(functionName, arg));
+    }
+
+    private static unsafe Result<uint> CallRemoteFunction32<T>(this Module module, string functionName, T arg)
+        where T : unmanaged
+    {
+        if (!module.GetSymbol(functionName)
             .TryUnwrap(out DebugSymbol function, out IResultError? err))
         {
             return Result<uint>.Err(err);
         }
 
-        if (!process.Allocate(&arg, (uint)sizeof(T))
+        if (!module.Parent.Allocate(&arg, (uint)sizeof(T))
             .TryUnwrap(out nuint pArg, out err))
         {
             return Result<uint>.Err(err);
         }
 
-        Result<uint> result = process.CreateRemoteThreadAndGetExitCode(function.Address, pArg);
+        Result<uint> result = module.Parent.CreateRemoteThreadAndGetExitCode(function.Address, pArg);
 
-        process.Free(pArg);
+        module.Parent.Free(pArg);
         return result;
     }
 
-    private static unsafe Result<uint> CallRemoteFunction64<T>(this Module module, Process process, string functionName, T arg)
+    private static unsafe Result<uint> CallRemoteFunction64<T>(this Module module, string functionName, T arg)
         where T : unmanaged
     {
         nuint pFunction = WinInterop.GetProcAddress(module.Base, Encoding.UTF8.GetBytes(functionName));
@@ -181,15 +180,15 @@ public static class ModuleExtensions
             return MemoryError.FromLastWin32Error();
         }
 
-        if (!process.Allocate(&arg, (uint)sizeof(T))
+        if (!module.Parent.Allocate(&arg, (uint)sizeof(T))
             .TryUnwrap(out nuint pArg, out IResultError? err))
         {
             return Result<uint>.Err(err);
         }
 
-        Result<uint> result = process.CreateRemoteThreadAndGetExitCode(pFunction, pArg);
+        Result<uint> result = module.Parent.CreateRemoteThreadAndGetExitCode(pFunction, pArg);
 
-        process.Free(pArg);
+        module.Parent.Free(pArg);
         return result;
     }
 }

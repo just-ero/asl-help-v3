@@ -23,7 +23,7 @@ internal static class ApiSerializer
         T? request = Deserialize<T>(stream);
         if (request is null)
         {
-            Serialize(stream, ResponseCode.InvalidRequest);
+            Serialize(stream, ResponseCode.InvalidPacket);
             return default;
         }
 

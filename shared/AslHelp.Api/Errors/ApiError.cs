@@ -20,7 +20,7 @@ internal sealed record ApiError : ResultError
             ResponseCode.Unknown => Unknown,
             ResponseCode.Ok => Ok,
             ResponseCode.UnknownRequest => UnknownRequest,
-            ResponseCode.InvalidRequest => InvalidRequest,
+            ResponseCode.InvalidPacket => InvalidPacket,
             _ => new($"Server responded '{responseCode}'.")
         };
     }
@@ -34,6 +34,6 @@ internal sealed record ApiError : ResultError
     public static ApiError UnknownRequest
         => new("Request code was not known by the server.");
 
-    public static ApiError InvalidRequest
-        => new("Request was null or otherwise invalid.");
+    public static ApiError InvalidPacket
+        => new("Packet was null or otherwise invalid.");
 }

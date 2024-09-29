@@ -14,4 +14,9 @@ internal static class Lib
     ///     The name of the <c>kernel32</c> library.
     /// </summary>
     public const string Kernel32 = "kernel32.dll";
+
+    /// <summary>
+    ///     The name of the <c>psapi</c> library.
+    /// </summary>
+    public const string PsApi = "psapi.dll";
 }

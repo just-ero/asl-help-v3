@@ -25,7 +25,7 @@ public sealed class MonoClient : BaseClient
             GetMonoImageResponse? response = ApiSerializer.ReceivePacket<GetMonoImageResponse>(_pipe);
             return response is not null
                 ? response
-                : ApiError.FromResponseCode(ResponseCode.InvalidRequest);
+                : ApiError.FromResponseCode(ResponseCode.InvalidPacket);
         }
 
         return ApiError.FromResponseCode(responseCode);
@@ -41,7 +41,7 @@ public sealed class MonoClient : BaseClient
             GetMonoClassResponse? response = ApiSerializer.ReceivePacket<GetMonoClassResponse>(_pipe);
             return response is not null
                 ? response
-                : ApiError.FromResponseCode(ResponseCode.InvalidRequest);
+                : ApiError.FromResponseCode(ResponseCode.InvalidPacket);
         }
 
         return ApiError.FromResponseCode(responseCode);

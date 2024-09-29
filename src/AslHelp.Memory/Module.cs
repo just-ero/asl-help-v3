@@ -31,6 +31,8 @@ public sealed class Module
         MemorySize = mi.SizeOfImage;
     }
 
+    public required Process Parent { get; init; }
+
     public string Name { get; }
     public string FileName { get; }
     public nuint Base { get; }

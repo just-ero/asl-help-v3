@@ -17,4 +17,9 @@ internal sealed record MemoryError : ResultError
     {
         return new(WinInteropWrapper.GetLastWin32ErrorMessage());
     }
+
+    public static MemoryError ModuleNotFound(string moduleName)
+    {
+        return new($"Module '{moduleName}' not found.");
+    }
 }

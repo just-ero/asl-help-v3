@@ -7,5 +7,5 @@ public enum ResponseCode
     Ok,
 
     UnknownRequest,
-    InvalidRequest
+    InvalidPacket
 }

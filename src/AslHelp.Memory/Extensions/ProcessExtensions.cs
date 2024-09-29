@@ -1,19 +1,15 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 using AslHelp.Collections.Extensions;
 using AslHelp.Memory.Errors;
 using AslHelp.Memory.Native;
 using AslHelp.Memory.Native.Enums;
 using AslHelp.Memory.Native.Structs;
-using AslHelp.Shared;
 using AslHelp.Shared.Results;
 using AslHelp.Shared.Results.Errors;
 
@@ -51,6 +47,24 @@ public static class ProcessExtensions
             && nWritten == dataSize;
     }
 
+    public static Result<Module> GetModule(this Process process, string moduleName)
+    {
+        Func<Module, bool> filter =
+            Path.IsPathRooted(moduleName)
+            ? (module => module.FileName.Equals(moduleName, StringComparison.InvariantCultureIgnoreCase))
+            : (module => module.Name.Equals(moduleName, StringComparison.InvariantCultureIgnoreCase));
+
+        foreach (Module module in process.GetModules())
+        {
+            if (filter(module))
+            {
+                return module;
+            }
+        }
+
+        return MemoryError.ModuleNotFound(moduleName);
+    }
+
     public static IEnumerable<Module> GetModules(this Process process)
     {
         uint processId = (uint)process.Id;
@@ -66,7 +80,10 @@ public static class ProcessExtensions
 
             do
             {
-                yield return new(me);
+                yield return new(me)
+                {
+                    Parent = process
+                };
             } while (WinInterop.Module32Next(snapshot, ref me));
         }
         finally
@@ -91,7 +108,7 @@ public static class ProcessExtensions
             ? stackalloc nuint[128]
             : (mhRented = ArrayPool<nuint>.Shared.Rent(count));
 
-        if (!WinInterop.EnumProcessModules(processHandle, moduleHandles, (uint)(count * sizeof(nuint)), out bytesNeeded, ListModulesFilter.ListAll))
+        if (!WinInterop.EnumProcessModules(processHandle, moduleHandles[..count], bytesNeeded, out _, ListModulesFilter.ListAll))
         {
             ArrayPool<nuint>.Shared.ReturnIfNotNull(mhRented);
             return MemoryError.FromLastWin32Error();
@@ -102,11 +119,12 @@ public static class ProcessExtensions
         char[] fnRented;
         Span<char> fileName = fnRented = ArrayPool<char>.Shared.Rent(WinInterop.UnicodeStringMaxChars);
 
-        foreach (nuint moduleHandle in moduleHandles)
+        foreach (nuint moduleHandle in moduleHandles[..count])
         {
-            uint length = WinInterop.GetModuleFileName(moduleHandle, fileName);
+            uint length = WinInterop.GetModuleFileName(processHandle, moduleHandle, fileName);
             if (length == 0)
             {
+                Console.WriteLine(WinInteropWrapper.GetLastWin32ErrorMessage());
                 continue;
             }
 
@@ -115,8 +133,10 @@ public static class ProcessExtensions
                 continue;
             }
 
-            Module module = new(moduleInfo, fileName[..(int)length].ToString());
-            modules.Add(module);
+            modules.Add(new(moduleInfo, fileName[..(int)length].ToString())
+            {
+                Parent = process
+            });
         }
 
         ArrayPool<nuint>.Shared.ReturnIfNotNull(mhRented);
@@ -175,103 +195,88 @@ public static class ProcessExtensions
         } while (address < max);
     }
 
-    public static bool Inject(this Process process, string dllToInject)
+    public static Result<Module> Inject(this Process process, string dllToInject)
     {
-        Result<Module> rModule = process.GetModulesLongPathSafe()
-            .AndThen<Module>(modules =>
-            {
-                return Path.IsPathRooted(dllToInject)
-                    ? modules.FirstOrDefault(m => m.FileName.Equals(dllToInject, StringComparison.InvariantCultureIgnoreCase))
-                    : modules.FirstOrDefault(m => m.Name.Equals(dllToInject, StringComparison.InvariantCultureIgnoreCase));
-            });
-
-        if (rModule.IsOk)
+        if (process.GetModule(dllToInject)
+            .TryUnwrap(out Module? module, out _)
+            && module is not null)
         {
-            return true;
+            return module;
         }
 
-        if (!process.Is64Bit()
-            .TryUnwrap(out bool is64Bit, out _))
-        {
-            return false;
-        }
-
-        if (is64Bit)
-        {
-            return Inject64(process, dllToInject);
-        }
-        else
-        {
-            return Inject32(process, dllToInject);
-        }
+        return process.Is64Bit()
+            .AndThen(is64Bit => is64Bit
+                ? Inject64(process, dllToInject)
+                : Inject32(process, dllToInject))
+            .AndThen(() => process.GetModule(dllToInject));
     }
 
-    private static unsafe bool Inject32(this Process process, string dllToInject)
+    private static unsafe Result Inject32(this Process process, string dllToInject)
     {
-        Result<DebugSymbol> rLoadLibraryW = process.GetModulesLongPathSafe()
-            .AndThen<Module>(
-                modules => modules.FirstOrDefault(m => m.Name.Equals(Lib.Kernel32, StringComparison.InvariantCultureIgnoreCase)))
-            .AndThen(m => m.GetSymbol(process, "LoadLibraryW"));
-
-        if (!rLoadLibraryW
-            .TryUnwrap(out DebugSymbol loadLibraryW, out _))
+        if (!process.GetModule(Lib.Kernel32)
+            .AndThen(kernel32 => kernel32.GetSymbol("LoadLibraryW"))
+            .TryUnwrap(out DebugSymbol loadLibraryW, out IResultError? err))
         {
-            return false;
+            return Result.Err(err);
         }
 
         fixed (char* pDllToInject = dllToInject)
         {
             if (!process.AllocateString(dllToInject)
-                .TryUnwrap(out nuint pDll, out _))
+                .TryUnwrap(out nuint pDll, out err))
             {
-                return false;
+                return Result.Err(err);
             }
 
-            if (process.CreateRemoteThreadAndGetExitCode(loadLibraryW.Address, pDll)
-                .TryUnwrap(out uint exitCode, out _))
+            if (!process.CreateRemoteThreadAndGetExitCode(loadLibraryW.Address, pDll)
+                .TryUnwrap(out uint exitCode, out err))
             {
-                return exitCode != 0;
+                process.Free(pDll);
+                return Result.Err(err);
             }
 
             process.Free(pDll);
-
-            return false;
+            return exitCode != 0
+                ? Result.Ok()
+                : MemoryError.FromLastWin32Error();
         }
     }
 
-    private static unsafe bool Inject64(this Process process, string dllToInject)
+    private static unsafe Result Inject64(this Process process, string dllToInject)
     {
         nuint kernel32 = WinInterop.GetModuleHandle(Lib.Kernel32);
         if (kernel32 == 0)
         {
-            return false;
+            return MemoryError.FromLastWin32Error();
         }
 
-        nuint loadLibrary = WinInterop.GetProcAddress(kernel32, "LoadLibraryW"u8);
-        if (loadLibrary == 0)
+        nuint loadLibraryW = WinInterop.GetProcAddress(kernel32, "LoadLibraryW"u8);
+        if (loadLibraryW == 0)
         {
             WinInterop.CloseHandle(kernel32);
-            return false;
+            return MemoryError.FromLastWin32Error();
         }
 
         fixed (char* pDllToInject = dllToInject)
         {
             if (!process.AllocateString(dllToInject)
-                .TryUnwrap(out nuint pDll, out _))
+                .TryUnwrap(out nuint pDll, out IResultError? err))
             {
                 WinInterop.CloseHandle(kernel32);
-                return false;
+                return Result.Err(err);
             }
 
-            if (process.CreateRemoteThreadAndGetExitCode(loadLibrary, pDll)
-                .TryUnwrap(out uint exitCode, out _))
+            if (!process.CreateRemoteThreadAndGetExitCode(loadLibraryW, pDll)
+                .TryUnwrap(out uint exitCode, out err))
             {
-                return exitCode != 0;
+                process.Free(pDll);
+                return Result.Err(err);
             }
 
             process.Free(pDll);
-
-            return false;
+            return exitCode != 0
+                ? Result.Ok()
+                : MemoryError.FromLastWin32Error();
         }
     }
 
@@ -345,9 +350,11 @@ public static class ProcessExtensions
         }
     }
 
-    public static bool Free(this Process process, nuint address)
+    public static Result Free(this Process process, nuint address)
     {
         nuint processHandle = (nuint)(nint)process.Handle;
-        return WinInterop.VirtualFree(processHandle, address, 0, MemoryRangeState.Release);
+        return WinInterop.VirtualFree(processHandle, address, 0, MemoryRangeState.Release)
+            ? Result.Ok()
+            : MemoryError.FromLastWin32Error();
     }
 }
