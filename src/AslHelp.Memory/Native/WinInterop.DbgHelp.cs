@@ -149,7 +149,7 @@ internal static unsafe partial class WinInterop
         nuint processHandle,
         nuint moduleBase,
         string? mask,
-        delegate* unmanaged[Stdcall]<SYMBOL_INFOW*, uint, void*, int> pCallback,
+        delegate* unmanaged[Stdcall]<SymbolInfo*, uint, void*, int> pCallback,
         void* context)
     {
         fixed (char* pMask = mask)
@@ -169,7 +169,7 @@ internal static unsafe partial class WinInterop
 #pragma warning disable IDE1006
             ulong BaseOfDll,
             ushort* Mask,
-            delegate* unmanaged[Stdcall]<SYMBOL_INFOW*, uint, void*, int> EnumSymbolsCallback,
+            delegate* unmanaged[Stdcall]<SymbolInfo*, uint, void*, int> EnumSymbolsCallback,
             void* UserContext);
 #pragma warning restore IDE1006
     }
@@ -196,5 +196,30 @@ internal static unsafe partial class WinInterop
         [SuppressUnmanagedCodeSecurity]
         static extern int SymCleanup(
             void* hProcess);
+    }
+
+    public static bool SymFromName(nuint processHandle, string name, out SymbolInfo symbol)
+    {
+        var lSymbol = new SymbolInfo { SizeOfStruct = (uint)sizeof(SymbolInfo) };
+
+        fixed (char* pName = name)
+        {
+            if (SymFromNameW((void*)processHandle, (ushort*)pName, &lSymbol) != 0)
+            {
+                symbol = lSymbol;
+                return true;
+            }
+
+            return false;
+        }
+
+        [DllImport(Lib.DbgHelp, EntryPoint = nameof(SymFromNameW), ExactSpelling = true, SetLastError = true)]
+        [SuppressUnmanagedCodeSecurity]
+        static extern int SymFromNameW(
+            void* hProcess,
+#pragma warning disable IDE1006
+            ushort* Name,
+            SymbolInfo* Symbol);
+#pragma warning restore IDE1006
     }
 }

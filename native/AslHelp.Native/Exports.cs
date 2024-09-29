@@ -12,8 +12,6 @@ using AslHelp.Api.Servers;
 using AslHelp.Native.Mono;
 using AslHelp.Native.Mono.Metadata;
 
-[module: SkipLocalsInit]
-
 namespace AslHelp.Native;
 
 internal static partial class Exports

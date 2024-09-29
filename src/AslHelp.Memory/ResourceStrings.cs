@@ -8,10 +8,10 @@ internal static class Lib
     /// <summary>
     ///     The name of the <c>dbghelp</c> library.
     /// </summary>
-    public const string DbgHelp = "dbghelp";
+    public const string DbgHelp = "dbghelp.dll";
 
     /// <summary>
     ///     The name of the <c>kernel32</c> library.
     /// </summary>
-    public const string Kernel32 = "kernel32";
+    public const string Kernel32 = "kernel32.dll";
 }

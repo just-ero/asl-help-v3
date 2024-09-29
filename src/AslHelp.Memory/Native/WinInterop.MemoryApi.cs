@@ -119,17 +119,17 @@ internal static unsafe partial class WinInterop
     ///     A pointer to the base address of the region of pages to be queried.
     /// </param>
     /// <param name="mbi">
-    ///     The <see cref="MEMORY_BASIC_INFORMATION"/> structure in which information about the specified page range is returned.
+    ///     The <see cref="MemoryBasicInformation"/> structure in which information about the specified page range is returned.
     /// </param>
     /// <returns>
     ///     The actual number of bytes returned in the information buffer if the function succeeds;
     ///     otherwise, 0.
     /// </returns>
-    public static nuint VirtualQuery(nuint processHandle, nuint baseAddress, out MEMORY_BASIC_INFORMATION mbi)
+    public static nuint VirtualQuery(nuint processHandle, nuint baseAddress, out MemoryBasicInformation mbi)
     {
-        fixed (MEMORY_BASIC_INFORMATION* pMbi = &mbi)
+        fixed (MemoryBasicInformation* pMbi = &mbi)
         {
-            return VirtualQueryEx((void*)processHandle, (void*)baseAddress, pMbi, (nuint)sizeof(MEMORY_BASIC_INFORMATION));
+            return VirtualQueryEx((void*)processHandle, (void*)baseAddress, pMbi, (nuint)sizeof(MemoryBasicInformation));
         }
 
         [DllImport(Lib.Kernel32, EntryPoint = nameof(VirtualQueryEx), ExactSpelling = true, SetLastError = true)]
@@ -137,7 +137,7 @@ internal static unsafe partial class WinInterop
         static extern nuint VirtualQueryEx(
             void* hProcess,
             void* lpAddress,
-            MEMORY_BASIC_INFORMATION* lpBuffer,
+            MemoryBasicInformation* lpBuffer,
             nuint dwLength);
     }
 
@@ -171,8 +171,8 @@ internal static unsafe partial class WinInterop
         nuint processHandle,
         nuint baseAddress,
         nuint size,
-        MemState allocationType,
-        MemProtect memoryProtection)
+        MemoryRangeState allocationType,
+        MemoryRangeProtect memoryProtection)
     {
         return VirtualAllocEx((void*)processHandle, (void*)baseAddress, size, (uint)allocationType, (uint)memoryProtection);
 
@@ -213,7 +213,7 @@ internal static unsafe partial class WinInterop
         nuint processHandle,
         nuint baseAddress,
         uint size,
-        MemState freeType)
+        MemoryRangeState freeType)
     {
         return VirtualFreeEx((void*)processHandle, (void*)baseAddress, size, (uint)freeType) != 0;
 

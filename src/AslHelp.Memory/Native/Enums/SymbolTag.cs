@@ -1,13 +1,13 @@
 ﻿namespace AslHelp.Memory.Native.Enums;
 
 /// <summary>
-///     Specifies the type of the <see cref="SYMBOL_INFOW"/>.
+///     Specifies the type of the <see cref="Structs.SymbolInfo"/>.
 /// </summary>
 /// <remarks>
 ///     For further information see:
 ///     <i><see href="https://docs.microsoft.com/previous-versions/visualstudio/visual-studio-2010/bkedss5f(v=vs.100)">SymTagEnum</see></i>
 /// </remarks>
-internal enum SymTag : uint
+internal enum SymbolTag : uint
 {
     /// <summary>
     ///     Indicates that the symbol has no type.

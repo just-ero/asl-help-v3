@@ -2,16 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(SharedPath)\AslHelp.Api\AslHelp.Api.csproj" />
     <ProjectReference Include="$(SrcPath)\AslHelp.Memory\AslHelp.Memory.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Reloaded.Injector" Version="1.2.5" />
   </ItemGroup>
 
 </Project>

@@ -15,25 +15,25 @@ internal enum StandardAccess : uint
     /// <summary>
     ///     Required to delete the object.
     /// </summary>
-    DELETE = 0x010000,
+    Delete = 0x010000,
 
     /// <summary>
     ///     Required to read information in the security descriptor for the object.
     /// </summary>
-    READ_CONTROL = 0x020000,
+    ReadControl = 0x020000,
 
     /// <summary>
     ///     Required to modify the DACL in the security descriptor for the object.
     /// </summary>
-    WRITE_DAC = 0x040000,
+    WriteDac = 0x040000,
 
     /// <summary>
     ///     Required to change the owner in the security descriptor for the object.
     /// </summary>
-    WRITE_OWNER = 0x080000,
+    WriteOwner = 0x080000,
 
     /// <summary>
     ///     The right to use the object for synchronization.
     /// </summary>
-    SYNCHRONIZE = 0x100000
+    Synchronize = 0x100000
 }

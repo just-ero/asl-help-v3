@@ -10,7 +10,7 @@ namespace AslHelp.Memory.Native.Structs;
 ///     <i><see href="https://learn.microsoft.com/en-us/windows/win32/api/tlhelp32/ns-tlhelp32-moduleentry32w">MODULEENTRY32W structure (tlhelp32.h)</see></i>
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
-public unsafe struct ModuleEntry32
+internal unsafe struct ModuleEntry32
 {
     public const int ModuleLength = 256;
     public const int ExePathLength = 260;
@@ -23,12 +23,12 @@ public unsafe struct ModuleEntry32
     /// <summary>
     ///     This member is no longer used, and is always set to one.
     /// </summary>
-    public uint ModuleID;
+    public uint ModuleId;
 
     /// <summary>
     ///     The identifier of the process whose modules are to be examined.
     /// </summary>
-    public uint ProcessID;
+    public uint ProcessId;
 
     /// <summary>
     ///     The load count of the module, which is not generally meaningful, and usually equal to 0xFFFF.
@@ -64,6 +64,4 @@ public unsafe struct ModuleEntry32
     ///     The module path.
     /// </summary>
     public fixed ushort ExePath[ExePathLength];
-
-    public static uint SelfSize => (uint)sizeof(ModuleEntry32);
 }

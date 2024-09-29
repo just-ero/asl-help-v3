@@ -12,7 +12,7 @@ namespace AslHelp.Memory.Native.Structs;
 ///    <i><see href="https://docs.microsoft.com/windows/win32/api/winnt/ns-winnt-memory_basic_information">MEMORY_BASIC_INFORMATION structure (winnt.h)</see></i>
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
-internal unsafe struct MEMORY_BASIC_INFORMATION
+internal unsafe struct MemoryBasicInformation
 {
     /// <summary>
     ///     A pointer to the base address of the region of pages.
@@ -27,7 +27,7 @@ internal unsafe struct MEMORY_BASIC_INFORMATION
     /// <summary>
     ///     The memory protection option when the region was initially allocated.
     /// </summary>
-    public MemProtect AllocationProtect;
+    public MemoryRangeProtect AllocationProtect;
 
     /// <summary>
     ///     The size of the region beginning at the base address in which all pages have identical attributes, in bytes.
@@ -37,16 +37,16 @@ internal unsafe struct MEMORY_BASIC_INFORMATION
     /// <summary>
     ///     The state of the pages in the region.
     /// </summary>
-    public MemState State;
+    public MemoryRangeState State;
 
     /// <summary>
     ///     The access protection of the pages in the region.
     /// </summary>
-    public MemProtect Protect;
+    public MemoryRangeProtect Protect;
 
     /// <summary>
     ///     The type of pages in the region.
     /// </summary>
-    public MemType Type;
+    public MemoryRangeType Type;
 }
 

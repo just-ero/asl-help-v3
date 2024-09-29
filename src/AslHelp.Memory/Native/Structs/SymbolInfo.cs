@@ -12,7 +12,7 @@ namespace AslHelp.Memory.Native.Structs;
 ///     <i><see href="https://docs.microsoft.com/windows/win32/api/dbghelp/ns-dbghelp-symbol_infow">SYMBOL_INFOW structure (dbghelp.h)</see></i>
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
-internal unsafe struct SYMBOL_INFOW
+internal unsafe struct SymbolInfo
 {
     /// <summary>
     ///     The size of the structure, in bytes.
@@ -27,12 +27,12 @@ internal unsafe struct SYMBOL_INFOW
     /// <summary>
     ///     This member is reserved for system use.
     /// </summary>
-    public ulong Reserved_0;
+    public ulong Reserved0;
 
     /// <summary>
     ///     This member is reserved for system use.
     /// </summary>
-    public ulong Reserved_1;
+    public ulong Reserved1;
 
     /// <summary>
     ///     The unique value for the symbol.
@@ -47,12 +47,12 @@ internal unsafe struct SYMBOL_INFOW
     /// <summary>
     ///     The base address of the module that contains the symbol.
     /// </summary>
-    public ulong ModBase;
+    public ulong ModuleBase;
 
     /// <summary>
     ///     The type of the symbol.
     /// </summary>
-    public SymFlags Flags;
+    public SymbolFlags Flags;
 
     /// <summary>
     ///     The value of a constant.
@@ -77,21 +77,20 @@ internal unsafe struct SYMBOL_INFOW
     /// <summary>
     ///     The PDB classification.
     /// </summary>
-    public SymTag Tag;
+    public SymbolTag Tag;
 
     /// <summary>
     ///     The length of the name, in characters, not including the null-terminating character.
     /// </summary>
-    public uint NameLen;
+    public uint NameLength;
 
     /// <summary>
     ///     The size of the Name buffer, in characters.
     /// </summary>
-    public uint MaxNameLen;
+    public uint MaxNameLength;
 
     /// <summary>
     ///     The name of the symbol.
     /// </summary>
     public fixed ushort Name[1024];
 }
-
