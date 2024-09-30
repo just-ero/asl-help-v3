@@ -11,14 +11,14 @@ namespace AslHelp.Api;
 internal static class ApiSerializer
 {
     public static ResponseCode SendPacket<T>(Stream stream, T request)
-        where T : IApiPacket
+        where T : IPayload
     {
         Serialize(stream, request);
         return Deserialize<ResponseCode>(stream);
     }
 
     public static T? ReceivePacket<T>(Stream stream)
-        where T : IApiPacket
+        where T : IPayload
     {
         T? request = Deserialize<T>(stream);
         if (request is null)

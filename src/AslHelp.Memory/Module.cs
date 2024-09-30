@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 
 using AslHelp.Memory.Native.Structs;
+using AslHelp.Memory.Utils;
 
 namespace AslHelp.Memory;
 
@@ -42,7 +43,6 @@ public sealed class Module
 
     public override string ToString()
     {
-        return
-            $"{nameof(Module)} {{ {nameof(Name)} = {Name}, {nameof(FileName)} = {FileName}, {nameof(Base)} = 0x{(ulong)Base:X}, {nameof(MemorySize)} = 0x{MemorySize:X} }}";
+        return $"{nameof(Module)} {{ {nameof(Name)} = {Name}, {nameof(FileName)} = {FileName}, {nameof(Base)} = 0x{(ulong)Base:X}, {nameof(MemorySize)} = 0x{MemorySize:X} }}";
     }
 }

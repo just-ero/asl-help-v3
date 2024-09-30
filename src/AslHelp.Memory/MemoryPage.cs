@@ -32,7 +32,6 @@ public readonly struct MemoryPage
 
     public override string ToString()
     {
-        return
-            $"{nameof(MemoryPage)} {{ {nameof(Base)} = 0x{(ulong)Base:X}, {nameof(RegionSize)} = 0x{RegionSize:X} }}";
+        return $"{nameof(MemoryPage)} {{ {nameof(Base)} = 0x{(ulong)Base:X}, {nameof(RegionSize)} = 0x{RegionSize:X} }}";
     }
 }

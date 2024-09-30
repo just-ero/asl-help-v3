@@ -5,25 +5,29 @@ using System.Linq;
 using AslHelp.Api;
 using AslHelp.Api.Clients;
 using AslHelp.Api.Requests;
-using AslHelp.Api.Responses;
-using AslHelp.Memory;
 using AslHelp.Memory.Extensions;
 
-const string DllPath = @"D:\Code\Projects\.just-ero\asl-help-v3\artifacts\publish\AslHelp.Native\release_win-x86\AslHelp.Native.dll";
+const string DllPath = @"D:\Code\Projects\.just-ero\asl-help-v3\artifacts\publish\AslHelp.Native\debug_win-x86\AslHelp.Native.dll";
 
 using Process game = Process.GetProcessesByName("ElenaTemple").Single();
 
-Module dll = game.Inject(DllPath).Unwrap();
+var dll = game.Inject(DllPath).Unwrap();
 uint ret = dll.CallRemoteFunction(ApiResourceStrings.ApiEntryPoint, 0).Unwrap();
 
-using MonoClient client = new(ApiResourceStrings.PipeName);
+using var client = new MonoClient(ApiResourceStrings.PipeName);
 client.Connect();
 
-GetMonoImageResponse monoImageResponse = client.GetMonoImage(new("Assembly-CSharp")).Unwrap();
-Console.WriteLine(monoImageResponse.Format());
+var image = client.GetMonoImage("Assembly-CSharp").Unwrap();
+Console.WriteLine(image);
 
-GetMonoClassResponse monoClassResponse = client.GetMonoClass(new(monoImageResponse.Address, "", "Player")).Unwrap();
-Console.WriteLine(monoClassResponse.Format());
+var klass = client.GetMonoClass(image.Address, "Player").Unwrap();
+Console.WriteLine(klass);
+
+var fields = client.GetMonoClassFields(klass.Address).Unwrap();
+foreach (var field in fields)
+{
+    Console.WriteLine(field.Unwrap());
+}
 
 client.SendRequest(RequestCode.Close);
 

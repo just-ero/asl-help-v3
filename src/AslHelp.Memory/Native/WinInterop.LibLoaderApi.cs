@@ -2,6 +2,8 @@ using System;
 using System.Runtime.InteropServices;
 using System.Security;
 
+using AslHelp.Memory.Utils;
+
 namespace AslHelp.Memory.Native;
 
 internal static unsafe partial class WinInterop

@@ -2,6 +2,7 @@
 using System.Security;
 
 using AslHelp.Memory.Native.Enums;
+using AslHelp.Memory.Utils;
 
 namespace AslHelp.Memory.Native;
 

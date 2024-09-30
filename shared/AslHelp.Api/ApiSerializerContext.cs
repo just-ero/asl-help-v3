@@ -8,8 +8,10 @@ namespace AslHelp.Api;
 [JsonSerializable(typeof(RequestCode))]
 [JsonSerializable(typeof(GetMonoImageRequest))]
 [JsonSerializable(typeof(GetMonoClassRequest))]
+[JsonSerializable(typeof(GetMonoClassFieldsRequest))]
 
 [JsonSerializable(typeof(ResponseCode))]
 [JsonSerializable(typeof(GetMonoImageResponse))]
 [JsonSerializable(typeof(GetMonoClassResponse))]
+[JsonSerializable(typeof(GetMonoClassFieldResponse))]
 internal sealed partial class ApiSerializerContext : JsonSerializerContext;

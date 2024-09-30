@@ -10,6 +10,7 @@ using AslHelp.Memory.Errors;
 using AslHelp.Memory.Native;
 using AslHelp.Memory.Native.Enums;
 using AslHelp.Memory.Native.Structs;
+using AslHelp.Memory.Utils;
 using AslHelp.Shared.Results;
 using AslHelp.Shared.Results.Errors;
 

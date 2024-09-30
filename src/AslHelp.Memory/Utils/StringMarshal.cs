@@ -1,9 +1,9 @@
 using System;
 using System.Text;
 
-namespace AslHelp.Memory;
+namespace AslHelp.Memory.Utils;
 
-public static class StringMarshal
+internal static class StringMarshal
 {
     public static unsafe string CreateStringFromNullTerminated(char* chars, int length)
     {

@@ -26,7 +26,6 @@ public readonly struct DebugSymbol
 
     public override string ToString()
     {
-        return
-            $"{nameof(DebugSymbol)} {{ {nameof(Name)} = {Name}, {nameof(Address)} = 0x{(ulong)Address:X}, {nameof(Size)} = 0x{Size:X} }}";
+        return $"{nameof(DebugSymbol)} {{ {nameof(Name)} = {Name}, {nameof(Address)} = 0x{(ulong)Address:X}, {nameof(Size)} = 0x{Size:X} }}";
     }
 }

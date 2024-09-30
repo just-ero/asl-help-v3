@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using System.IO.Pipes;
 
-using AslHelp.Api.Errors;
 using AslHelp.Api.Requests;
 using AslHelp.Api.Responses;
 using AslHelp.Shared.Results;
@@ -10,40 +10,31 @@ namespace AslHelp.Api.Clients;
 public sealed class MonoClient : BaseClient
 {
     public MonoClient(string pipeName)
-        : base(pipeName, PipeOptions.None) { }
+        : base(pipeName) { }
 
     public MonoClient(string pipeName, PipeOptions options)
         : base(pipeName, options) { }
 
-    public Result<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request)
+    public Result<GetMonoImageResponse> GetMonoImage(string fileName)
     {
-        ApiSerializer.Serialize(_pipe, RequestCode.GetMonoImage);
-
-        ResponseCode responseCode = ApiSerializer.SendPacket(_pipe, request);
-        if (responseCode == ResponseCode.Ok)
-        {
-            GetMonoImageResponse? response = ApiSerializer.ReceivePacket<GetMonoImageResponse>(_pipe);
-            return response is not null
-                ? response
-                : ApiError.FromResponseCode(ResponseCode.InvalidPacket);
-        }
-
-        return ApiError.FromResponseCode(responseCode);
+        GetMonoImageRequest request = new(fileName);
+        return Exchange<GetMonoImageRequest, GetMonoImageResponse>(request);
     }
 
-    public Result<GetMonoClassResponse> GetMonoClass(GetMonoClassRequest request)
+    public Result<GetMonoClassResponse> GetMonoClass(ulong imageAddress, string name)
     {
-        ApiSerializer.Serialize(_pipe, RequestCode.GetMonoClass);
+        return GetMonoClass(imageAddress, "", name);
+    }
 
-        ResponseCode responseCode = ApiSerializer.SendPacket(_pipe, request);
-        if (responseCode == ResponseCode.Ok)
-        {
-            GetMonoClassResponse? response = ApiSerializer.ReceivePacket<GetMonoClassResponse>(_pipe);
-            return response is not null
-                ? response
-                : ApiError.FromResponseCode(ResponseCode.InvalidPacket);
-        }
+    public Result<GetMonoClassResponse> GetMonoClass(ulong imageAddress, string nameSpace, string className)
+    {
+        GetMonoClassRequest request = new(imageAddress, nameSpace, className);
+        return Exchange<GetMonoClassRequest, GetMonoClassResponse>(request);
+    }
 
-        return ApiError.FromResponseCode(responseCode);
+    public Result<IEnumerable<Result<GetMonoClassFieldResponse>>> GetMonoClassFields(ulong classAddress)
+    {
+        GetMonoClassFieldsRequest request = new(classAddress);
+        return ExchangeMany<GetMonoClassFieldsRequest, GetMonoClassFieldResponse>(request);
     }
 }
