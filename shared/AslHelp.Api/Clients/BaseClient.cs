@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO.Pipes;
-using System.Reflection;
 
 using AslHelp.Api.Errors;
 using AslHelp.Api.Requests;
@@ -21,6 +20,8 @@ public class BaseClient : IDisposable
     {
         _pipe = new(".", pipeName, PipeDirection.InOut, options);
     }
+
+    public bool IsConnected { get; private set; }
 
     public void SendRequest(RequestCode code)
     {
@@ -62,49 +63,49 @@ public class BaseClient : IDisposable
             return ApiError.FromResponseCode(responseCode);
         }
 
-        return Result<IEnumerable<Result<TResponse>>>.Ok(receivePackets());
-
-        IEnumerable<Result<TResponse>> receivePackets()
-        {
-            try
-            {
-                while (true)
-                {
-                    if (ReceiveResponse() is ResponseCode.EnumerableEnd or not ResponseCode.EnumerableMore)
-                    {
-                        yield break;
-                    }
-
-                    TResponse? response = ApiSerializer.ReceivePacket<TResponse>(_pipe);
-                    if (response is null)
-                    {
-                        yield return ApiError.FromResponseCode(ResponseCode.InvalidPacket);
-                    }
-                    else
-                    {
-                        yield return response;
-                    }
-
-                    SendRequest(RequestCode.EnumerableContinue);
-                }
-            }
-            finally
-            {
-                ApiSerializer.Serialize(_pipe, RequestCode.EnumerableBreak);
-            }
-        }
+        return Result<IEnumerable<Result<TResponse>>>.Ok(ReceiveMany<TResponse>());
     }
 
     public void Connect(int timeout = -1)
     {
         _pipe.Connect(timeout);
+        IsConnected = true;
     }
 
     public void Dispose()
     {
         if (_pipe.IsConnected)
         {
+            SendRequest(RequestCode.Close);
             _pipe.Dispose();
+        }
+
+        IsConnected = false;
+    }
+
+    private IEnumerable<Result<TResponse>> ReceiveMany<TResponse>()
+        where TResponse : IResponse
+    {
+        try
+        {
+            while (ReceiveResponse() == ResponseCode.EnumerableMore)
+            {
+                TResponse? response = ApiSerializer.ReceivePacket<TResponse>(_pipe);
+                if (response is null)
+                {
+                    yield return ApiError.FromResponseCode(ResponseCode.InvalidPacket);
+                }
+                else
+                {
+                    yield return response;
+                }
+
+                SendRequest(RequestCode.EnumerableContinue);
+            }
+        }
+        finally
+        {
+            ApiSerializer.Serialize(_pipe, RequestCode.EnumerableBreak);
         }
     }
 }

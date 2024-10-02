@@ -8,6 +8,17 @@ using System.Runtime.InteropServices;
 namespace AslHelp.Native.Mono.Metadata;
 
 /// <remarks>
+///     <see href="https://github.com/Unity-Technologies/mono/blob/unity-2017.1-mbe/mono/metadata/class-internals.h#L51-L56"/>
+/// </remarks>
+internal enum MonoTypeNameFormat
+{
+    Il,
+    Reflection,
+    FullName,
+    AssemblyQualified
+}
+
+/// <remarks>
 ///     <see href="https://github.com/Unity-Technologies/mono/blob/unity-2017.1-mbe/mono/metadata/class-internals.h#L66-L96"/>
 /// </remarks>
 internal unsafe struct MonoMethod

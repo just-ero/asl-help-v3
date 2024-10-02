@@ -61,6 +61,7 @@ internal sealed class NativeMonoServer : MonoServerBase
             ulong address;
             int offset;
             string name;
+            string typeName;
 
             unsafe
             {
@@ -78,12 +79,14 @@ internal sealed class NativeMonoServer : MonoServerBase
                 address = (ulong)field;
                 offset = field->Offset;
                 name = StringMarshal.CreateStringFromNullTerminated(field->Name);
+                typeName = MonoApi.mono_type_get_name_full(field->Type, MonoTypeNameFormat.FullName);
             }
 
             yield return new(
                 address,
                 offset,
-                name);
+                name,
+                typeName);
         }
     }
 }

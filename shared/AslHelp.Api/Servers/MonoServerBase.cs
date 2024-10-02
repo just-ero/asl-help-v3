@@ -14,7 +14,7 @@ public abstract class MonoServerBase : BaseServer
     protected MonoServerBase(string pipeName, PipeOptions options)
         : base(pipeName, options) { }
 
-    public sealed override void ProcessRequest(RequestCode code)
+    protected sealed override void ProcessRequest(RequestCode code)
     {
         switch (code)
         {

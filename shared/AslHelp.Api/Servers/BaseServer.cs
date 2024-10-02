@@ -21,7 +21,7 @@ public class BaseServer : IDisposable
 
     public bool IsConnected { get; private set; }
 
-    public virtual void ProcessRequest(RequestCode code)
+    protected virtual void ProcessRequest(RequestCode code)
     {
         switch (code)
         {
@@ -73,7 +73,7 @@ public class BaseServer : IDisposable
 
                 ApiSerializer.SendPacket(_pipe, e.Current);
 
-                if (ReceiveRequest() is RequestCode.EnumerableBreak or not RequestCode.EnumerableContinue)
+                if (ReceiveRequest() != RequestCode.EnumerableContinue)
                 {
                     return;
                 }
