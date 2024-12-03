@@ -12,6 +12,3 @@ BenchmarkDotNet.Artifacts/
 
 # User-specific files
 *.user
-
-# asl-help
-lib/

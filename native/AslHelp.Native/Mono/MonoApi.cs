@@ -1,7 +1,5 @@
 using System.Runtime.InteropServices;
 
-using AslHelp.Native.Mono.Metadata;
-
 namespace AslHelp.Native.Mono;
 
 /// <summary>
@@ -11,16 +9,36 @@ internal static unsafe partial class MonoApi
 {
     private const string Mono = "mono.dll";
 
-    [LibraryImport(Mono, EntryPoint = nameof(mono_image_loaded), StringMarshalling = StringMarshalling.Utf8)]
-    public static partial MonoImage* mono_image_loaded(string name);
+    // MonoImage
+    [LibraryImport(Mono, EntryPoint = "mono_image_loaded", StringMarshalling = StringMarshalling.Utf8)]
+    public static partial nuint MonoImage_Loaded(
+        string name);
 
-    [LibraryImport(Mono, EntryPoint = nameof(mono_class_from_name_case), StringMarshalling = StringMarshalling.Utf8)]
-    public static partial MonoClass* mono_class_from_name_case(MonoImage* image, string name_space, string name);
-
-    [LibraryImport(Mono, EntryPoint = nameof(mono_class_get_fields))]
-    public static partial MonoClassField* mono_class_get_fields(MonoClass* klass, ref nuint iter);
-
-    [LibraryImport(Mono, EntryPoint = nameof(mono_type_get_name_full))]
+    [LibraryImport(Mono, EntryPoint = "mono_image_get_name")]
     [return: MarshalAs(UnmanagedType.LPStr)]
-    public static partial string mono_type_get_name_full(MonoType* type, MonoTypeNameFormat format);
+    public static partial string MonoImage_GetName(
+        nuint image);
+
+    [LibraryImport(Mono, EntryPoint = "mono_image_get_filename")]
+    [return: MarshalAs(UnmanagedType.LPStr)]
+    public static partial string MonoImage_GetFileName(
+        nuint image);
+
+    // MonoClass
+    [LibraryImport(Mono, EntryPoint = "mono_class_get")]
+    public static partial nuint MonoClass_FromToken(
+        nuint image,
+        uint type_token);
+
+    [LibraryImport(Mono, EntryPoint = "mono_class_from_name_case", StringMarshalling = StringMarshalling.Utf8)]
+    public static partial nuint MonoClass_FromName(
+        nuint image,
+        string name_space,
+        string name);
+
+    [LibraryImport(Mono, EntryPoint = "mono_type_get_name_full")]
+    [return: MarshalAs(UnmanagedType.LPStr)]
+    public static partial string MonoType_GetName(
+        nuint type,
+        int format);
 }

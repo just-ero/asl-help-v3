@@ -23,15 +23,15 @@ Console.WriteLine(image);
 var klass = client.GetMonoClass(image.Address, "Player").Unwrap();
 Console.WriteLine(klass);
 
-var fields = client.GetMonoClassFields(klass.Address).Unwrap();
-foreach (var field in fields)
-{
-    Console.WriteLine(field.Unwrap());
-    if (field.Unwrap().Name == "deathSound")
-    {
-        break;
-    }
-}
+// var fields = client.GetMonoClassFields(klass.Address).Unwrap();
+// foreach (var field in fields)
+// {
+//     Console.WriteLine(field.Unwrap());
+//     if (field.Unwrap().Name == "deathSound")
+//     {
+//         break;
+//     }
+// }
 
 client.SendRequest(RequestCode.Close);
 

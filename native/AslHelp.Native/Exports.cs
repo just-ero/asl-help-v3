@@ -28,21 +28,21 @@ internal static partial class Exports
 
         try
         {
-            Trace.Log("Waiting for connection...");
+            Output.Log("Waiting for connection...");
             server.WaitForConnection();
-            Trace.Log("  => Connected!");
+            Output.Log("  => Connected!");
 
             while (server.IsConnected)
             {
-                Trace.Log("Processing next request...");
+                Output.Log("Processing next request...");
                 server.ProcessNextRequest();
             }
 
-            Trace.Log("  => Disconnected.");
+            Output.Log("  => Disconnected.");
         }
         catch (Exception ex)
         {
-            Trace.Log($"Main loop encountered an exception: {ex}");
+            Output.Log($"Main loop encountered an exception: {ex}");
         }
     }
 }

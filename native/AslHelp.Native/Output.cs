@@ -3,11 +3,11 @@ using System.Runtime.CompilerServices;
 
 namespace AslHelp.Native;
 
-internal static class Trace
+internal static class Output
 {
     [Conditional("DEBUG")]
     [OverloadResolutionPriority(1)]
-    public static void Log(object? output)
+    public static void Log<T>(T output)
     {
         Debug.WriteLine($"[asl-help] {output}");
     }
