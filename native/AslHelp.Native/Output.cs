@@ -6,13 +6,14 @@ namespace AslHelp.Native;
 internal static class Output
 {
     [Conditional("DEBUG")]
-    [OverloadResolutionPriority(1)]
+    [OverloadResolutionPriority(0)]
     public static void Log<T>(T output)
     {
         Debug.WriteLine($"[asl-help] {output}");
     }
 
     [Conditional("DEBUG")]
+    [OverloadResolutionPriority(1)]
     public static void Log(string format, params object?[] args)
     {
         Log(string.Format(format, args));

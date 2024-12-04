@@ -289,19 +289,19 @@ dotnet_naming_rule.local_functions_should_be_camelcase.style    = camelcase
 # Symbol specifications
 
 dotnet_naming_symbols.types_and_namespaces.applicable_kinds           = namespace, class, struct, interface, enum
-dotnet_naming_symbols.types_and_namespaces.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.types_and_namespaces.applicable_accessibilities = private, protected, private_protected, protected_internal, internal, public
 dotnet_naming_symbols.types_and_namespaces.required_modifiers         =
 
 dotnet_naming_symbols.interfaces.applicable_kinds           = interface
-dotnet_naming_symbols.interfaces.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.interfaces.applicable_accessibilities = private, protected, private_protected, protected_internal, internal, public
 dotnet_naming_symbols.interfaces.required_modifiers         =
 
 dotnet_naming_symbols.non_field_members.applicable_kinds           = property, event, delegate, method
-dotnet_naming_symbols.non_field_members.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.non_field_members.applicable_accessibilities = private, protected, private_protected, protected_internal, internal, public
 dotnet_naming_symbols.non_field_members.required_modifiers         =
 
 dotnet_naming_symbols.constant_fields.applicable_kinds           = field
-dotnet_naming_symbols.constant_fields.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.constant_fields.applicable_accessibilities = private, protected, private_protected, protected_internal, internal, public
 dotnet_naming_symbols.constant_fields.required_modifiers         = const
 
 dotnet_naming_symbols.public_static_fields.applicable_kinds           = field
@@ -309,11 +309,11 @@ dotnet_naming_symbols.public_static_fields.applicable_accessibilities = public, 
 dotnet_naming_symbols.public_static_fields.required_modifiers         = static
 
 dotnet_naming_symbols.public_fields.applicable_kinds           = field
-dotnet_naming_symbols.public_fields.applicable_accessibilities = public, internal
+dotnet_naming_symbols.public_fields.applicable_accessibilities = protected, private_protected, protected_internal, internal, public
 dotnet_naming_symbols.public_fields.required_modifiers         =
 
 dotnet_naming_symbols.private_fields.applicable_kinds           = field
-dotnet_naming_symbols.private_fields.applicable_accessibilities = private, protected, protected_internal, private_protected
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
 dotnet_naming_symbols.private_fields.required_modifiers         =
 
 dotnet_naming_symbols.type_parameters.applicable_kinds           = type_parameter

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.IO.Pipes;
 
 using AslHelp.Api.Requests;
@@ -25,7 +24,6 @@ public abstract class MonoServerBase : BaseServer
                 Exchange<GetMonoClassRequest, GetMonoClassResponse>(GetMonoClass);
                 break;
             case RequestCode.GetMonoClassFields:
-                ExchangeMany<GetMonoClassFieldsRequest, GetMonoClassFieldResponse>(GetMonoClassFields);
                 break;
         }
 
@@ -34,5 +32,4 @@ public abstract class MonoServerBase : BaseServer
 
     protected abstract GetMonoImageResponse GetMonoImage(GetMonoImageRequest request);
     protected abstract GetMonoClassResponse GetMonoClass(GetMonoClassRequest request);
-    protected abstract IEnumerable<GetMonoClassFieldResponse> GetMonoClassFields(GetMonoClassFieldsRequest request);
 }

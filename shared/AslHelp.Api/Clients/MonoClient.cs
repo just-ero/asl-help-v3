@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.IO.Pipes;
 
 using AslHelp.Api.Requests;
@@ -30,11 +29,5 @@ public sealed class MonoClient : BaseClient
     {
         GetMonoClassRequest request = new(imageAddress, nameSpace, className);
         return Exchange<GetMonoClassRequest, GetMonoClassResponse>(request);
-    }
-
-    public Result<IEnumerable<Result<GetMonoClassFieldResponse>>> GetMonoClassFields(ulong classAddress)
-    {
-        GetMonoClassFieldsRequest request = new(classAddress);
-        return ExchangeMany<GetMonoClassFieldsRequest, GetMonoClassFieldResponse>(request);
     }
 }

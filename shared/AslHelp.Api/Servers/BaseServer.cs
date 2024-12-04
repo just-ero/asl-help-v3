@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO.Pipes;
 
 using AslHelp.Api.Requests;
@@ -56,30 +55,6 @@ public class BaseServer : IDisposable
         if (ApiSerializer.ReceivePacket<TRequest>(_pipe) is { } request)
         {
             ApiSerializer.SendPacket(_pipe, transform(request));
-        }
-    }
-
-    public void ExchangeMany<TRequest, TResponse>(Func<TRequest, IEnumerable<TResponse>> transform)
-        where TRequest : IRequest
-        where TResponse : IResponse
-    {
-        if (ApiSerializer.ReceivePacket<TRequest>(_pipe) is { } request)
-        {
-            using IEnumerator<TResponse> e = transform(request).GetEnumerator();
-
-            while (e.MoveNext())
-            {
-                SendResponse(ResponseCode.EnumerableMore);
-
-                ApiSerializer.SendPacket(_pipe, e.Current);
-
-                if (ReceiveRequest() != RequestCode.EnumerableContinue)
-                {
-                    return;
-                }
-            }
-
-            SendResponse(ResponseCode.EnumerableEnd);
         }
     }
 

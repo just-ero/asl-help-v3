@@ -1,9 +1,9 @@
 namespace AslHelp.Api.Requests;
 
 public sealed class GetMonoImageRequest(
-    string fileName) : IRequest
+    string name) : IRequest
 {
-    public string FileName { get; } = fileName;
+    public string Name { get; } = name;
 
     public RequestCode Code => RequestCode.GetMonoImage;
 }

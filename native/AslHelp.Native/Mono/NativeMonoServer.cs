@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 using AslHelp.Api;
 using AslHelp.Api.Requests;
 using AslHelp.Api.Responses;
@@ -14,9 +12,9 @@ internal sealed class NativeMonoServer : MonoServerBase
 
     protected override unsafe GetMonoImageResponse GetMonoImage(GetMonoImageRequest request)
     {
-        Output.Log($"[GetMonoImage] Request: {request.FileName}");
+        Output.Log($"[GetMonoImage] Request: {request.Name}");
 
-        nuint image = MonoApi.MonoImage_Loaded(request.FileName);
+        nuint image = MonoApi.MonoImage_Loaded(request.Name);
         if (image == 0)
         {
             Output.Log("[GetMonoImage]   => Failure!");
@@ -47,46 +45,5 @@ internal sealed class NativeMonoServer : MonoServerBase
 
         return new(
             klass);
-    }
-
-    protected override IEnumerable<GetMonoClassFieldResponse> GetMonoClassFields(GetMonoClassFieldsRequest request)
-    {
-        // Output.Log($"[GetMonoClassFields] Request: {request.Klass:X}");
-
-        // nuint iter = 0;
-        // while (true)
-        // {
-        //     ulong address;
-        //     int offset;
-        //     string name;
-        //     string typeName;
-
-        //     unsafe
-        //     {
-        //         Output.Log($"[GetMonoClassFields]   => Loading next field...");
-
-        //         nuint field = MonoApi.mono_class_get_fields((MonoClass*)request.Klass, ref iter);
-        //         if (field == 0)
-        //         {
-        //             Output.Log($"[GetMonoClassFields]     => No more fields!");
-        //             break;
-        //         }
-
-        //         Output.Log($"[GetMonoClassFields]     => Success: 0x{(ulong)field:X}.");
-
-        //         address = (ulong)field;
-        //         offset = field->Offset;
-        //         name = StringMarshal.CreateStringFromNullTerminated(field->Name);
-        //         typeName = MonoApi.mono_type_get_name_full(field->Type, MonoTypeNameFormat.FullName);
-        //     }
-
-        //     yield return new(
-        //         address,
-        //         offset,
-        //         name,
-        //         typeName);
-        // }
-
-        yield break;
     }
 }
