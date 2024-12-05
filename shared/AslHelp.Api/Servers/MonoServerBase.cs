@@ -26,8 +26,6 @@ public abstract class MonoServerBase : BaseServer
             case RequestCode.GetMonoClassFields:
                 break;
         }
-
-        base.ProcessRequest(code);
     }
 
     protected abstract GetMonoImageResponse GetMonoImage(GetMonoImageRequest request);

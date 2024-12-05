@@ -50,8 +50,7 @@ public static class ProcessExtensions
 
     public static Result<Module> GetModule(this Process process, string moduleName)
     {
-        Func<Module, bool> filter =
-            Path.IsPathRooted(moduleName)
+        Func<Module, bool> filter = Path.IsPathRooted(moduleName)
             ? (module => module.FileName.Equals(moduleName, StringComparison.InvariantCultureIgnoreCase))
             : (module => module.Name.Equals(moduleName, StringComparison.InvariantCultureIgnoreCase));
 
@@ -199,8 +198,7 @@ public static class ProcessExtensions
     public static Result<Module> Inject(this Process process, string dllToInject)
     {
         if (process.GetModule(dllToInject)
-            .TryUnwrap(out Module? module, out _)
-            && module is not null)
+            .TryUnwrap(out Module? module, out _))
         {
             return module;
         }
@@ -221,26 +219,23 @@ public static class ProcessExtensions
             return Result.Err(err);
         }
 
-        fixed (char* pDllToInject = dllToInject)
+        if (!process.AllocateString(dllToInject)
+            .TryUnwrap(out nuint pDll, out err))
         {
-            if (!process.AllocateString(dllToInject)
-                .TryUnwrap(out nuint pDll, out err))
-            {
-                return Result.Err(err);
-            }
-
-            if (!process.CreateRemoteThreadAndGetExitCode(loadLibraryW.Address, pDll)
-                .TryUnwrap(out uint exitCode, out err))
-            {
-                process.Free(pDll);
-                return Result.Err(err);
-            }
-
-            process.Free(pDll);
-            return exitCode != 0
-                ? Result.Ok()
-                : MemoryError.FromLastWin32Error();
+            return Result.Err(err);
         }
+
+        if (!process.CreateRemoteThreadAndGetExitCode(loadLibraryW.Address, pDll)
+            .TryUnwrap(out uint exitCode, out err))
+        {
+            process.Free(pDll);
+            return Result.Err(err);
+        }
+
+        process.Free(pDll);
+        return exitCode != 0
+            ? Result.Ok()
+            : MemoryError.FromLastWin32Error();
     }
 
     private static unsafe Result Inject64(this Process process, string dllToInject)
@@ -258,27 +253,24 @@ public static class ProcessExtensions
             return MemoryError.FromLastWin32Error();
         }
 
-        fixed (char* pDllToInject = dllToInject)
+        if (!process.AllocateString(dllToInject)
+            .TryUnwrap(out nuint pDll, out IResultError? err))
         {
-            if (!process.AllocateString(dllToInject)
-                .TryUnwrap(out nuint pDll, out IResultError? err))
-            {
-                WinInterop.CloseHandle(kernel32);
-                return Result.Err(err);
-            }
-
-            if (!process.CreateRemoteThreadAndGetExitCode(loadLibraryW, pDll)
-                .TryUnwrap(out uint exitCode, out err))
-            {
-                process.Free(pDll);
-                return Result.Err(err);
-            }
-
-            process.Free(pDll);
-            return exitCode != 0
-                ? Result.Ok()
-                : MemoryError.FromLastWin32Error();
+            WinInterop.CloseHandle(kernel32);
+            return Result.Err(err);
         }
+
+        if (!process.CreateRemoteThreadAndGetExitCode(loadLibraryW, pDll)
+            .TryUnwrap(out uint exitCode, out err))
+        {
+            process.Free(pDll);
+            return Result.Err(err);
+        }
+
+        process.Free(pDll);
+        return exitCode != 0
+            ? Result.Ok()
+            : MemoryError.FromLastWin32Error();
     }
 
     public static unsafe Result<uint> CreateRemoteThreadAndGetExitCode(this Process process, nuint startAddress, nuint arg)
@@ -305,12 +297,6 @@ public static class ProcessExtensions
         return result;
     }
 
-    public static unsafe Result<nuint> Allocate<T>(this Process process, T data)
-        where T : unmanaged
-    {
-        return process.Allocate(&data, (uint)sizeof(T));
-    }
-
     public static unsafe Result<nuint> Allocate(this Process process, void* data, uint dataSize)
     {
         nuint processHandle = (nuint)(nint)process.Handle;
@@ -334,20 +320,27 @@ public static class ProcessExtensions
         return pRemote;
     }
 
+    public static unsafe Result<nuint> Allocate<T>(this Process process, T data)
+        where T : unmanaged
+    {
+        return process.Allocate(&data, (uint)sizeof(T));
+    }
+
+    public static unsafe Result<nuint> Allocate<T>(this Process process, ReadOnlySpan<T> data)
+        where T : unmanaged
+    {
+        fixed (T* pData = data)
+        {
+            return process.Allocate(pData, (uint)(sizeof(T) * data.Length));
+        }
+    }
+
     public static unsafe Result<nuint> AllocateString(this Process process, string value)
     {
         fixed (char* pValue = value)
         {
             uint length = (uint)((value.Length + 1) * sizeof(char));
             return process.Allocate(pValue, length);
-        }
-    }
-
-    public static unsafe Result<nuint> AllocateString(this Process process, ReadOnlySpan<byte> value)
-    {
-        fixed (byte* pValue = value)
-        {
-            return process.Allocate(pValue, (uint)value.Length);
         }
     }
 

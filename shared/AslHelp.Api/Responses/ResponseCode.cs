@@ -6,9 +6,6 @@ public enum ResponseCode : byte
 
     Ok,
 
-    EnumerableMore,
-    EnumerableEnd,
-
     UnknownRequest,
     InvalidPacket
 }

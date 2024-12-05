@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -97,7 +95,7 @@ public static class ModuleExtensions
         nuint processHandle = (nuint)(nint)module.Parent.Handle;
 
         var callback =
-            (delegate* unmanaged[Stdcall]<SymbolInfo*, uint, void*, int>)Marshal.GetFunctionPointerForDelegate(enumSymbolsCallback);
+            (delegate* unmanaged[Stdcall]<SymbolInfo*, uint, void*, int>)Marshal.GetFunctionPointerForDelegate(_enumSymbolsCallbackDelegate);
 
         List<DebugSymbol> symbols = [];
         void* pSymbols = Unsafe.AsPointer(ref symbols);
@@ -123,13 +121,16 @@ public static class ModuleExtensions
         WinInterop.SymCleanup(processHandle);
 
         return symbols;
+    }
 
-        static int enumSymbolsCallback(SymbolInfo* pSymInfo, uint symbolSize, void* userContext)
-        {
-            Unsafe.AsRef<List<DebugSymbol>>(userContext).Add(new(*pSymInfo));
+    private static readonly unsafe WinInterop.PsymEnumeratesymbolsCallback _enumSymbolsCallbackDelegate = EnumSymbolsCallback;
 
-            return 1;
-        }
+    [MonoPInvokeCallback(typeof(WinInterop.PsymEnumeratesymbolsCallback))]
+    private static unsafe int EnumSymbolsCallback(SymbolInfo* pSymInfo, uint symbolSize, void* userContext)
+    {
+        Unsafe.AsRef<List<DebugSymbol>>(userContext).Add(new(*pSymInfo));
+
+        return 1;
     }
 
     public static Result Eject(this Module module)

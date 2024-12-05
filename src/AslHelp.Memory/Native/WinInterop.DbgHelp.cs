@@ -175,6 +175,14 @@ internal static unsafe partial class WinInterop
 #pragma warning restore IDE1006
     }
 
+    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+    public delegate int PsymEnumeratesymbolsCallback(
+        SymbolInfo* pSymInfo,
+#pragma warning disable IDE1006
+        uint SymbolSize,
+        void* UserContext);
+#pragma warning restore IDE1006
+
     /// <summary>
     ///     Deallocates all resources associated with the process handle.<br/>
     ///     For further information, see:

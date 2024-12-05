@@ -4,9 +4,6 @@ public enum RequestCode : byte
 {
     Unknown,
 
-    EnumerableContinue,
-    EnumerableBreak,
-
     GetMonoImage,
     GetMonoClass,
     GetMonoClassFields,

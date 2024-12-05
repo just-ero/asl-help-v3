@@ -14,9 +14,9 @@ public sealed class MonoClient : BaseClient
     public MonoClient(string pipeName, PipeOptions options)
         : base(pipeName, options) { }
 
-    public Result<GetMonoImageResponse> GetMonoImage(string fileName)
+    public Result<GetMonoImageResponse> GetMonoImage(string name)
     {
-        GetMonoImageRequest request = new(fileName);
+        GetMonoImageRequest request = new(name);
         return Exchange<GetMonoImageRequest, GetMonoImageResponse>(request);
     }
 

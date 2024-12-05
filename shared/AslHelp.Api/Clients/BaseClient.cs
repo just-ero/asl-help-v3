@@ -27,24 +27,20 @@ public class BaseClient : IDisposable
         ApiSerializer.Serialize(_pipe, code);
     }
 
-    public ResponseCode ReceiveResponse()
-    {
-        return ApiSerializer.Deserialize<ResponseCode>(_pipe);
-    }
-
     public Result<TResponse> Exchange<TRequest, TResponse>(TRequest request)
         where TRequest : IRequest
         where TResponse : IResponse
     {
-        SendRequest(request.Code);
+        ApiSerializer.Serialize(_pipe, request.Code);
+        ApiSerializer.Serialize(_pipe, request);
 
-        ResponseCode responseCode = ApiSerializer.SendPacket(_pipe, request);
+        ResponseCode responseCode = ApiSerializer.Deserialize<ResponseCode>(_pipe);
         if (responseCode != ResponseCode.Ok)
         {
             return ApiError.FromResponseCode(responseCode);
         }
 
-        TResponse? response = ApiSerializer.ReceivePacket<TResponse>(_pipe);
+        TResponse? response = ApiSerializer.Deserialize<TResponse>(_pipe);
         return response is not null
             ? response
             : ApiError.FromResponseCode(ResponseCode.InvalidPacket);
@@ -60,7 +56,6 @@ public class BaseClient : IDisposable
     {
         if (_pipe.IsConnected)
         {
-            SendRequest(RequestCode.Close);
             _pipe.Dispose();
         }
 

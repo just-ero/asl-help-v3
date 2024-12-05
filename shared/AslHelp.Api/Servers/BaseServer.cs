@@ -20,39 +20,28 @@ public class BaseServer : IDisposable
 
     public bool IsConnected { get; private set; }
 
-    protected virtual void ProcessRequest(RequestCode code)
+    public void Start()
     {
-        switch (code)
+        while (_pipe.IsConnected)
         {
-            case RequestCode.Close:
-                IsConnected = false;
-                break;
+            RequestCode request = ApiSerializer.Deserialize<RequestCode>(_pipe);
+
+            if (request == RequestCode.Close)
+            {
+                // ?
+            }
         }
     }
 
-    public RequestCode ProcessNextRequest()
-    {
-        RequestCode code = ReceiveRequest();
-        ProcessRequest(code);
-
-        return code;
-    }
-
-    public void SendResponse(ResponseCode responseCode)
-    {
-        ApiSerializer.Serialize(_pipe, responseCode);
-    }
-
-    public RequestCode ReceiveRequest()
-    {
-        return ApiSerializer.Deserialize<RequestCode>(_pipe);
-    }
+    protected virtual void ProcessRequest(RequestCode code) { }
 
     public void Exchange<TRequest, TResponse>(Func<TRequest, TResponse> transform)
         where TRequest : IRequest
         where TResponse : IResponse
     {
-        if (ApiSerializer.ReceivePacket<TRequest>(_pipe) is { } request)
+        TRequest? request = ApiSerializer.Deserialize<TRequest>(_pipe);
+
+        if (request is not null)
         {
             ApiSerializer.SendPacket(_pipe, transform(request));
         }
@@ -60,17 +49,19 @@ public class BaseServer : IDisposable
 
     public void WaitForConnection()
     {
-        _pipe.WaitForConnection();
-        IsConnected = true;
+        if (!IsConnected)
+        {
+            _pipe.WaitForConnection();
+            IsConnected = true;
+        }
     }
 
     public void Dispose()
     {
-        if (_pipe.IsConnected)
+        if (IsConnected)
         {
             _pipe.Dispose();
+            IsConnected = false;
         }
-
-        IsConnected = false;
     }
 }
