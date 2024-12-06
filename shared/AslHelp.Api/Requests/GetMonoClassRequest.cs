@@ -9,5 +9,5 @@ public sealed class GetMonoClassRequest(
     public string Namespace { get; } = @namespace;
     public string Name { get; } = name;
 
-    public RequestCode Code => RequestCode.GetMonoClass;
+    RequestCode IRequest.Code => RequestCode.GetMonoClass;
 }

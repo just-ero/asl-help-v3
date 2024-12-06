@@ -22,18 +22,35 @@ public class BaseServer : IDisposable
 
     public void Start()
     {
-        while (_pipe.IsConnected)
+        while (true)
         {
-            RequestCode request = ApiSerializer.Deserialize<RequestCode>(_pipe);
+            _pipe.WaitForConnection();
 
-            if (request == RequestCode.Close)
+            while (_pipe.IsConnected)
             {
-                // ?
+                RequestCode request = ApiSerializer.Deserialize<RequestCode>(_pipe);
+
+                if (request == RequestCode.Close)
+                {
+                    _pipe.Disconnect();
+                    break;
+                }
+
+                (ResponseCode, IRequest?) d = ProcessRequest(request);
+                ApiSerializer.Serialize(_pipe, response.Code);
+
+                if (response is { Code: ResponseCode.Ok, Response: { } payload })
+                {
+                    ApiSerializer.Serialize(_pipe, payload);
+                }
             }
         }
     }
 
-    protected virtual void ProcessRequest(RequestCode code) { }
+    protected virtual ResponseResult ProcessRequest(RequestCode request)
+    {
+        return new(ResponseCode.Ok);
+    }
 
     public void Exchange<TRequest, TResponse>(Func<TRequest, TResponse> transform)
         where TRequest : IRequest
@@ -43,7 +60,7 @@ public class BaseServer : IDisposable
 
         if (request is not null)
         {
-            ApiSerializer.SendPacket(_pipe, transform(request));
+            ApiSerializer.Serialize(_pipe, transform(request));
         }
     }
 

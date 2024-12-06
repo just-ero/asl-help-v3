@@ -6,7 +6,6 @@ public enum RequestCode : byte
 
     GetMonoImage,
     GetMonoClass,
-    GetMonoClassFields,
 
     Close
 }

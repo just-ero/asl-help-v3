@@ -5,5 +5,5 @@ public sealed class GetMonoImageRequest(
 {
     public string Name { get; } = name;
 
-    public RequestCode Code => RequestCode.GetMonoImage;
+    RequestCode IRequest.Code => RequestCode.GetMonoImage;
 }

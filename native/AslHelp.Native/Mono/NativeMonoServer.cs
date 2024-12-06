@@ -10,7 +10,7 @@ internal sealed class NativeMonoServer : MonoServerBase
     public NativeMonoServer()
         : base(ApiResourceStrings.PipeName) { }
 
-    protected override unsafe GetMonoImageResponse GetMonoImage(GetMonoImageRequest request)
+    protected override GetMonoImageResponse GetMonoImage(GetMonoImageRequest request)
     {
         Output.Log($"[GetMonoImage] Request: {request.Name}");
 
@@ -30,7 +30,7 @@ internal sealed class NativeMonoServer : MonoServerBase
             MonoApi.MonoImage_GetFileName(image));
     }
 
-    protected override unsafe GetMonoClassResponse GetMonoClass(GetMonoClassRequest request)
+    protected override GetMonoClassResponse GetMonoClass(GetMonoClassRequest request)
     {
         Output.Log($"[GetMonoClass] Request: {string.Join('.', request.Namespace, request.Name)}");
 
@@ -41,7 +41,7 @@ internal sealed class NativeMonoServer : MonoServerBase
             return new(0);
         }
 
-        Output.Log($"[GetMonoClass]   => Success: 0x{(ulong)klass:X}.");
+        Output.Log($"[GetMonoClass]   => Success: 0x{klass:X}.");
 
         return new(
             klass);

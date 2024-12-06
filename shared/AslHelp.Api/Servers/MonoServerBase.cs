@@ -23,8 +23,6 @@ public abstract class MonoServerBase : BaseServer
             case RequestCode.GetMonoClass:
                 Exchange<GetMonoClassRequest, GetMonoClassResponse>(GetMonoClass);
                 break;
-            case RequestCode.GetMonoClassFields:
-                break;
         }
     }
 
