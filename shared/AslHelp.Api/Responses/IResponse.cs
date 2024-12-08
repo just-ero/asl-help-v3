@@ -1,3 +1,3 @@
 namespace AslHelp.Api.Responses;
 
-public interface IResponse : IPayload;
+public interface IResponse;

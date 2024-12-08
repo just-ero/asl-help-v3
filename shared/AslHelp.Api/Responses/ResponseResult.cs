@@ -1,24 +1,53 @@
 namespace AslHelp.Api.Responses;
 
-public sealed class ResponseResult
+public interface IResponseResult
 {
-    public ResponseResult(ResponseCode code)
+    ResponseCode ResponseCode { get; }
+    IResponse? Response { get; }
+}
+
+public readonly struct ResponseResult : IResponseResult
+{
+    public ResponseResult(ResponseCode responseCode)
     {
-        Code = code;
+        ResponseCode = responseCode;
     }
 
-    public ResponseResult(IResponse response)
+    public ResponseCode ResponseCode { get; }
+    public IResponse? Response => default;
+
+    public static implicit operator ResponseResult(ResponseCode responseCode)
     {
-        Code = ResponseCode.Ok;
+        return new(responseCode);
+    }
+}
+
+public readonly struct ResponseResult<TResponse> : IResponseResult
+    where TResponse : IResponse
+{
+    public ResponseResult(TResponse response)
+    {
+        ResponseCode = ResponseCode.Ok;
         Response = response;
     }
 
-    public ResponseCode Code { get; }
-    public IResponse? Response { get; }
-
-    public void Deconstruct(out ResponseCode code, out IResponse? response)
+    public ResponseResult(ResponseCode responseCode)
     {
-        code = Code;
-        response = Response;
+        ResponseCode = responseCode;
+    }
+
+    public ResponseCode ResponseCode { get; }
+    public TResponse? Response { get; }
+
+    IResponse? IResponseResult.Response => Response;
+
+    public static implicit operator ResponseResult<TResponse>(TResponse response)
+    {
+        return new(response);
+    }
+
+    public static implicit operator ResponseResult<TResponse>(ResponseCode responseCode)
+    {
+        return new(responseCode);
     }
 }

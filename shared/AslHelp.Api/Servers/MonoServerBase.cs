@@ -13,19 +13,16 @@ public abstract class MonoServerBase : BaseServer
     protected MonoServerBase(string pipeName, PipeOptions options)
         : base(pipeName, options) { }
 
-    protected sealed override void ProcessRequest(RequestCode code)
+    protected sealed override IResponseResult ProcessRequest(RequestCode code)
     {
-        switch (code)
+        return code switch
         {
-            case RequestCode.GetMonoImage:
-                Exchange<GetMonoImageRequest, GetMonoImageResponse>(GetMonoImage);
-                break;
-            case RequestCode.GetMonoClass:
-                Exchange<GetMonoClassRequest, GetMonoClassResponse>(GetMonoClass);
-                break;
-        }
+            RequestCode.GetMonoImage => Exchange<GetMonoImageRequest, GetMonoImageResponse>(GetMonoImage),
+            RequestCode.GetMonoClass => Exchange<GetMonoClassRequest, GetMonoClassResponse>(GetMonoClass),
+            _ => Unknown()
+        };
     }
 
-    protected abstract GetMonoImageResponse GetMonoImage(GetMonoImageRequest request);
-    protected abstract GetMonoClassResponse GetMonoClass(GetMonoClassRequest request);
+    protected abstract ResponseResult<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request);
+    protected abstract ResponseResult<GetMonoClassResponse> GetMonoClass(GetMonoClassRequest request);
 }

@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.IO.Pipes;
+using System.Threading.Tasks;
 
 using AslHelp.Api.Requests;
 using AslHelp.Api.Responses;
@@ -20,6 +22,17 @@ public class BaseServer : IDisposable
 
     public bool IsConnected { get; private set; }
 
+    public async Task StartAsync()
+    {
+        await _pipe.BeginWaitForConnection(
+            state =>
+            {
+                Debug.WriteLine($"{state.AsyncState}");
+            },
+            null
+        );
+    }
+
     public void Start()
     {
         while (true)
@@ -29,39 +42,43 @@ public class BaseServer : IDisposable
             while (_pipe.IsConnected)
             {
                 RequestCode request = ApiSerializer.Deserialize<RequestCode>(_pipe);
-
                 if (request == RequestCode.Close)
                 {
                     _pipe.Disconnect();
                     break;
                 }
 
-                (ResponseCode, IRequest?) d = ProcessRequest(request);
-                ApiSerializer.Serialize(_pipe, response.Code);
-
-                if (response is { Code: ResponseCode.Ok, Response: { } payload })
+                IResponseResult result = ProcessRequest(request);
+                if (result is { ResponseCode: ResponseCode.Ok, Response: { } payload })
                 {
+                    ApiSerializer.Serialize(_pipe, result.ResponseCode);
                     ApiSerializer.Serialize(_pipe, payload);
+                }
+                else
+                {
+                    ApiSerializer.Serialize(_pipe, result.ResponseCode);
                 }
             }
         }
     }
 
-    protected virtual ResponseResult ProcessRequest(RequestCode request)
+    protected virtual IResponseResult ProcessRequest(RequestCode request)
     {
-        return new(ResponseCode.Ok);
+        return Ok();
     }
 
-    public void Exchange<TRequest, TResponse>(Func<TRequest, TResponse> transform)
+    public IResponseResult Exchange<TRequest, TResponse>(Func<TRequest, ResponseResult<TResponse>> transform)
         where TRequest : IRequest
         where TResponse : IResponse
     {
         TRequest? request = ApiSerializer.Deserialize<TRequest>(_pipe);
 
-        if (request is not null)
+        if (request is null)
         {
-            ApiSerializer.Serialize(_pipe, transform(request));
+            return Invalid();
         }
+
+        return transform(request);
     }
 
     public void WaitForConnection()
@@ -80,5 +97,37 @@ public class BaseServer : IDisposable
             _pipe.Dispose();
             IsConnected = false;
         }
+    }
+
+    protected ResponseResult Ok()
+    {
+        return ResponseCode.Ok;
+    }
+
+    protected ResponseResult<TResponse> Ok<TResponse>(TResponse response)
+        where TResponse : IResponse
+    {
+        return response;
+    }
+
+    protected ResponseResult Error(ResponseCode responseCode)
+    {
+        return responseCode;
+    }
+
+    protected ResponseResult<TResponse> Error<TResponse>(ResponseCode responseCode)
+        where TResponse : IResponse
+    {
+        return responseCode;
+    }
+
+    protected ResponseResult Invalid()
+    {
+        return ResponseCode.InvalidPacket;
+    }
+
+    protected ResponseResult Unknown()
+    {
+        return ResponseCode.Unknown;
     }
 }
