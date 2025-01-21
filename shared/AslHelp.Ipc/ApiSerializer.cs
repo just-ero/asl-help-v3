@@ -4,9 +4,9 @@ using System.Buffers.Binary;
 using System.IO;
 using System.Text.Json;
 
-namespace AslHelp.Api;
+namespace AslHelp.Ipc;
 
-internal static class ApiSerializer
+internal static class IpcSerializer
 {
     public static void Serialize<T>(Stream stream, T value)
     {

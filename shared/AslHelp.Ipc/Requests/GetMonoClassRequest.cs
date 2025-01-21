@@ -1,4 +1,4 @@
-namespace AslHelp.Api.Requests;
+namespace AslHelp.Ipc.Requests;
 
 public sealed class GetMonoClassRequest(
     ulong image,
@@ -8,6 +8,4 @@ public sealed class GetMonoClassRequest(
     public ulong Image { get; } = image;
     public string Namespace { get; } = @namespace;
     public string Name { get; } = name;
-
-    RequestCode IRequest.Code => RequestCode.GetMonoClass;
 }

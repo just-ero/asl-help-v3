@@ -1,4 +1,4 @@
-namespace AslHelp.Api;
+namespace AslHelp.Ipc;
 
 public static class ApiResourceStrings
 {

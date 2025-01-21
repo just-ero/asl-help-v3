@@ -1,4 +1,4 @@
-namespace AslHelp.Api.Requests;
+namespace AslHelp.Ipc.Requests;
 
 public enum RequestCode : byte
 {

@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.Linq;
 
-using AslHelp.Api;
-using AslHelp.Api.Clients;
-using AslHelp.Api.Requests;
+using AslHelp.Ipc;
+using AslHelp.Ipc.Clients;
+using AslHelp.Ipc.Requests;
 using AslHelp.Memory.Extensions;
 
 const string DllPath = @"D:\Code\Projects\.just-ero\asl-help-v3\artifacts\publish\AslHelp.Native\debug_win-x86\AslHelp.Native.dll";

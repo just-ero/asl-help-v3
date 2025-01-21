@@ -2,8 +2,8 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-using AslHelp.Api;
-using AslHelp.Api.Servers;
+using AslHelp.Ipc;
+using AslHelp.Ipc.Servers;
 using AslHelp.Native.Mono;
 
 namespace AslHelp.Native;

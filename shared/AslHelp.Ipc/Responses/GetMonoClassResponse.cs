@@ -1,4 +1,4 @@
-namespace AslHelp.Api.Responses;
+namespace AslHelp.Ipc.Responses;
 
 public sealed class GetMonoClassResponse(
     ulong address) : IResponse

@@ -1,3 +1,3 @@
-namespace AslHelp.Api;
+namespace AslHelp.Ipc;
 
 public interface IPayload;
