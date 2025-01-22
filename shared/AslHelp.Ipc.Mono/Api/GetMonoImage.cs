@@ -1,6 +1,5 @@
 using System;
 
-using AslHelp.Ipc.Errors;
 using AslHelp.Ipc.Protocol;
 using AslHelp.Shared.Results.Errors;
 
@@ -27,11 +26,11 @@ public readonly record struct GetMonoImage : IIpcFunc<
     public readonly record struct Request(
         string Name) : IRequest<ExitCode>
     {
-        public IResultError GetErr(ExitCode code)
+        public EndpointError GetErr(ExitCode code)
         {
             return code switch
             {
-                ExitCode.NotFound => $"Image '{Name}' not found.",
+                ExitCode.NotFound => Error.NotFound(Name),
                 _ => throw new ArgumentOutOfRangeException(nameof(code), code, null)
             };
         }
@@ -43,6 +42,14 @@ public readonly record struct GetMonoImage : IIpcFunc<
         string ModuleName,
         string FileName) : IResponse;
 
-    public readonly record struct Error(
-        string Message) : IResultError;
+    private sealed record Error : EndpointError
+    {
+        private Error(string message)
+            : base(message) { }
+
+        public static Error NotFound(string name)
+        {
+            return new($"Image '{name}' not found.");
+        }
+    }
 }
