@@ -1,6 +1,6 @@
 namespace AslHelp.Ipc.Mono;
 
-public enum MonoCommand : byte
+public enum MonoCommand : sbyte
 {
     None,
 

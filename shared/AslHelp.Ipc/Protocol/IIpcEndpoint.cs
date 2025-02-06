@@ -17,7 +17,7 @@ public interface IIpcAction<out TCommand, out TExitCode> : IIpcEndpoint<TCommand
 public interface IIpcAction<out TCommand, out TExitCode, out TRequest> : IIpcEndpoint<TCommand, TExitCode>
     where TCommand : unmanaged, Enum
     where TExitCode : unmanaged, Enum
-    where TRequest : IRequest<TExitCode>;
+    where TRequest : IRequest;
 
 public interface IIpcFunc<out TCommand, out TExitCode, out TResponse> : IIpcEndpoint<TCommand, TExitCode>
     where TCommand : unmanaged, Enum
@@ -27,5 +27,5 @@ public interface IIpcFunc<out TCommand, out TExitCode, out TResponse> : IIpcEndp
 public interface IIpcFunc<out TCommand, out TExitCode, out TRequest, out TResponse> : IIpcEndpoint<TCommand, TExitCode>
     where TCommand : unmanaged, Enum
     where TExitCode : unmanaged, Enum
-    where TRequest : IRequest<TExitCode>
+    where TRequest : IRequest
     where TResponse : IResponse;

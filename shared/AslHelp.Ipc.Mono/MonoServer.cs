@@ -34,5 +34,5 @@ public abstract class MonoServer : Server<MonoCommand>
         }
     }
 
-    protected abstract ActionResult<GetMonoImage.ExitCode, GetMonoImage.Response> GetMonoImage(GetMonoImage.Request request);
+    protected abstract IpcResult<GetMonoImage.ExitCode, GetMonoImage.Response> GetMonoImage(GetMonoImage.Request request);
 }

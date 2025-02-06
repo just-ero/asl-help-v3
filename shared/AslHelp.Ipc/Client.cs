@@ -31,10 +31,10 @@ public class Client<TCommand> : IDisposable
         {
             if (Enum.IsDefined(typeof(IpcExitCode), code))
             {
-                return IpcError.FromStatus((IpcExitCode)(Enum)code);
+                return Errors.IpcError.FromStatus((IpcExitCode)(Enum)code);
             }
 
-            return IpcError.FromStatus(code);
+            return Errors.IpcError.FromStatus(code);
         }
 
         return Result.Ok();
@@ -51,16 +51,16 @@ public class Client<TCommand> : IDisposable
         {
             if (Enum.IsDefined(typeof(IpcExitCode), code))
             {
-                return IpcError.FromStatus((IpcExitCode)(Enum)code);
+                return Errors.IpcError.FromStatus((IpcExitCode)(Enum)code);
             }
 
-            return IpcError.FromStatus(code);
+            return Errors.IpcError.FromStatus(code);
         }
 
         TResponse? response = IpcSerializer.Deserialize<TResponse?>(_pipe);
         return response is not null
             ? response
-            : IpcError.FromStatus(IpcExitCode.InvalidPacket);
+            : global::AslHelp.Ipc.Errors.IpcError.FromStatus<global::AslHelp.Ipc.Responses.IpcExitCode>(global::AslHelp.Ipc.Responses.IpcExitCode.InvalidPacket);
     }
 
     public Result Call<TExitCode, TRequest>(TCommand command, TRequest request, TExitCode ok)
@@ -75,10 +75,10 @@ public class Client<TCommand> : IDisposable
         {
             if (Enum.IsDefined(typeof(IpcExitCode), code))
             {
-                return IpcError.FromStatus((IpcExitCode)(Enum)code);
+                return Errors.IpcError.FromStatus((IpcExitCode)(Enum)code);
             }
 
-            return IpcError.FromStatus(code);
+            return Errors.IpcError.FromStatus(code);
         }
 
         return Result.Ok();
@@ -97,16 +97,16 @@ public class Client<TCommand> : IDisposable
         {
             if (Enum.IsDefined(typeof(IpcExitCode), code))
             {
-                return IpcError.FromStatus((IpcExitCode)(Enum)code);
+                return Errors.IpcError.FromStatus((IpcExitCode)(Enum)code);
             }
 
-            return IpcError.FromStatus(code);
+            return Errors.IpcError.FromStatus(code);
         }
 
         TResponse? response = IpcSerializer.Deserialize<TResponse?>(_pipe);
         return response is not null
             ? response
-            : IpcError.FromStatus(IpcExitCode.InvalidPacket);
+            : Errors.IpcError.FromStatus<IpcExitCode>(IpcExitCode.InvalidPacket);
     }
 
     public Result CallEndpoint<TExitCode>(IIpcAction<TCommand, TExitCode> endpoint)

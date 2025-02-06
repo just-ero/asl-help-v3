@@ -10,7 +10,7 @@ internal sealed class NativeMonoServer : MonoServerBase
     public NativeMonoServer()
         : base(ApiResourceStrings.PipeName) { }
 
-    protected override ActionResult<GetMonoClassResponse> GetMonoClass(GetMonoClassRequest request)
+    protected override IpcResult<GetMonoClassResponse> GetMonoClass(GetMonoClassRequest request)
     {
         Output.Log($"[GetMonoClass] Request: {string.Join('.', request.Namespace, request.Name)}");
 
@@ -27,7 +27,7 @@ internal sealed class NativeMonoServer : MonoServerBase
             klass);
     }
 
-    protected override ActionResult<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request)
+    protected override IpcResult<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request)
     {
         Output.Log($"[GetMonoImage] Request: {request.Name}");
 

@@ -1,11 +1,8 @@
 namespace AslHelp.Ipc.Requests;
 
-public enum RequestCode : byte
+public enum RequestCode : sbyte
 {
     Unknown,
-
-    GetMonoImage,
-    GetMonoClass,
 
     Close
 }
