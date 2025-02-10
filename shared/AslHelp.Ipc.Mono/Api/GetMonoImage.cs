@@ -1,5 +1,3 @@
-using System;
-
 using AslHelp.Ipc.Protocol;
 
 namespace AslHelp.Ipc.Mono.Api;

@@ -1,7 +1,6 @@
 using System;
 using System.IO.Pipes;
 
-using AslHelp.Ipc.Errors;
 using AslHelp.Ipc.Protocol;
 using AslHelp.Ipc.Responses;
 using AslHelp.Shared.Results;
