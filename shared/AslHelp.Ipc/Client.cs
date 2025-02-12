@@ -1,0 +1,1 @@
+namespace AslHelp.Ipc;

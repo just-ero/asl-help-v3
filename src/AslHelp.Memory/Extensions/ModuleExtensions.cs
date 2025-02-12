@@ -168,8 +168,8 @@ public static class ModuleExtensions
         }
 
         Result<uint> result = module.Parent.CreateRemoteThreadAndGetExitCode(function.Address, pArg);
-
         module.Parent.Free(pArg);
+
         return result;
     }
 
@@ -189,8 +189,8 @@ public static class ModuleExtensions
         }
 
         Result<uint> result = module.Parent.CreateRemoteThreadAndGetExitCode(pFunction, pArg);
-
         module.Parent.Free(pArg);
+
         return result;
     }
 }

@@ -28,15 +28,11 @@ internal static unsafe partial class WinInteropWrapper
             flags |= FormatMessageFlags.FromModuleHandle;
         }
 
-        Span<char> buffer = stackalloc char[256];
-
-        fixed (char* pBuffer = buffer)
+        char* buffer = stackalloc char[256];
+        int length = WinInterop.FormatMessage(flags, moduleHandle, (uint)errorCode, 0, buffer, 256, null);
+        if (length > 0)
         {
-            int length = WinInterop.FormatMessage(flags, moduleHandle, (uint)errorCode, 0, pBuffer, (uint)buffer.Length, null);
-            if (length > 0)
-            {
-                return $"{getAndTrimString(buffer[..length])} (0x{errorCode:X})";
-            }
+            return $"{getAndTrimString(new(buffer, length))} (0x{errorCode:X})";
         }
 
         if (Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER)
@@ -44,7 +40,7 @@ internal static unsafe partial class WinInteropWrapper
             flags |= FormatMessageFlags.AllocateBuffer;
 
             nint nativeMsgPtr;
-            int length = WinInterop.FormatMessage(flags, moduleHandle, (uint)errorCode, 0, (char*)&nativeMsgPtr, 0, null);
+            length = WinInterop.FormatMessage(flags, moduleHandle, (uint)errorCode, 0, (char*)&nativeMsgPtr, 0, null);
 
             if (length > 0)
             {
