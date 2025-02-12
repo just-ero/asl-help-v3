@@ -1,6 +1,7 @@
 using System;
 using System.IO.Pipes;
 
+using AslHelp.Ipc.Errors;
 using AslHelp.Ipc.Protocol;
 using AslHelp.Ipc.Responses;
 using AslHelp.Shared.Results;
@@ -20,20 +21,20 @@ public class Client<TCommand> : IDisposable
         _pipe = new(".", pipeName, PipeDirection.InOut, options);
     }
 
-    public Result Call<TExitCode>(TCommand command, TExitCode ok)
+    public Result Call<TExitCode>(TCommand command)
         where TExitCode : unmanaged, Enum
     {
         IpcSerializer.Serialize(_pipe, command);
 
         TExitCode code = IpcSerializer.Deserialize<TExitCode>(_pipe);
-        if (!code.Equals(ok))
+        if (!IpcExit<TExitCode>.IsOk(code))
         {
             if (Enum.IsDefined(typeof(IpcExitCode), code))
             {
-                return Errors.IpcError.FromStatus((IpcExitCode)(Enum)code);
+                return IpcError.FromStatus((IpcExitCode)(Enum)code);
             }
 
-            return Errors.IpcError.FromStatus(code);
+            return IpcError.FromStatus(code);
         }
 
         return Result.Ok();
@@ -50,16 +51,16 @@ public class Client<TCommand> : IDisposable
         {
             if (Enum.IsDefined(typeof(IpcExitCode), code))
             {
-                return Errors.IpcError.FromStatus((IpcExitCode)(Enum)code);
+                return IpcError.FromStatus((IpcExitCode)(Enum)code);
             }
 
-            return Errors.IpcError.FromStatus(code);
+            return IpcError.FromStatus(code);
         }
 
         TResponse? response = IpcSerializer.Deserialize<TResponse?>(_pipe);
         return response is not null
             ? response
-            : global::AslHelp.Ipc.Errors.IpcError.FromStatus<global::AslHelp.Ipc.Responses.IpcExitCode>(global::AslHelp.Ipc.Responses.IpcExitCode.InvalidPacket);
+            : IpcError.FromStatus(IpcExitCode.InvalidPacket);
     }
 
     public Result Call<TExitCode, TRequest>(TCommand command, TRequest request, TExitCode ok)
@@ -74,10 +75,10 @@ public class Client<TCommand> : IDisposable
         {
             if (Enum.IsDefined(typeof(IpcExitCode), code))
             {
-                return Errors.IpcError.FromStatus((IpcExitCode)(Enum)code);
+                return IpcError.FromStatus((IpcExitCode)(Enum)code);
             }
 
-            return Errors.IpcError.FromStatus(code);
+            return IpcError.FromStatus(code);
         }
 
         return Result.Ok();
@@ -96,16 +97,16 @@ public class Client<TCommand> : IDisposable
         {
             if (Enum.IsDefined(typeof(IpcExitCode), code))
             {
-                return Errors.IpcError.FromStatus((IpcExitCode)(Enum)code);
+                return IpcError.FromStatus((IpcExitCode)(Enum)code);
             }
 
-            return Errors.IpcError.FromStatus(code);
+            return IpcError.FromStatus(code);
         }
 
         TResponse? response = IpcSerializer.Deserialize<TResponse?>(_pipe);
         return response is not null
             ? response
-            : Errors.IpcError.FromStatus<IpcExitCode>(IpcExitCode.InvalidPacket);
+            : IpcError.FromStatus<IpcExitCode>(IpcExitCode.InvalidPacket);
     }
 
     public Result CallEndpoint<TExitCode>(IIpcAction<TCommand, TExitCode> endpoint)

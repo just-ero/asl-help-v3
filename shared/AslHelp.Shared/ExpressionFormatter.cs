@@ -1,24 +1,16 @@
 using System;
+using System.Reflection;
 using System.Text;
 
 namespace AslHelp.Shared;
 
-public static class ExpressionFormatter
+public static class PropertyExpressionFormatter
 {
-    public static string Format(string format, object tokenValues, FormatOptions options = default)
-    {
-        return Format(format, tokenValues, null, options);
-    }
-
-    public static string Format(string format, object value, IFormatProvider? formatProvider, FormatOptions options = default)
+    public static string Format<T>(string format, T value, BindingFlags flags, IFormatProvider? formatProvider = null)
     {
         ThrowHelper.ThrowIfNull(format);
 
-        StringBuilder sb = new(format.Length);
-
-        bool nonPublic = options.HasFlag(FormatOptions.NonPublic);
-        bool allowMissingKeys = options.HasFlag(FormatOptions.AllowMissingKeys);
-
+        StringBuilder builder = new(format.Length);
         ReadOnlySpan<char> remaining = format.AsSpan();
 
         while (true)
@@ -26,19 +18,24 @@ public static class ExpressionFormatter
             int start = remaining.IndexOfAny('{', '}');
             if (start == -1)
             {
-                sb.Append(remaining.ToString());
-                return sb.ToString();
+                // No more tokens.
+
+                builder.Append(remaining.ToString());
+
+                return builder.ToString();
             }
 
-            sb.Append(remaining[..start].ToString());
+            builder.Append(remaining[..start].ToString());
 
             char startToken = remaining[start];
-
             if (start + 1 < remaining.Length
                 && remaining[start + 1] == startToken)
             {
-                sb.Append(startToken);
+                // This is an escaped brace.
+
+                builder.Append(startToken);
                 remaining = remaining[(start + 2)..];
+
                 continue;
             }
 
@@ -48,7 +45,9 @@ public static class ExpressionFormatter
             }
 
             var content = remaining[(start + 1)..];
+
             int end = content.IndexOfAny('{', '}');
+            char endToken = content[end];
 
             if (end == -1
                 || content[end] != '}')
@@ -58,106 +57,43 @@ public static class ExpressionFormatter
 
             content = content[..end];
 
-            if (content.Length == 0)
+            if (content.IsEmpty)
             {
                 ThrowHelper.ThrowFormatException("Empty token.");
             }
 
-            var
+            int formatDelim = content.IndexOf(':');
+            string? valueFormat;
+            if (formatDelim == -1)
+            {
+                valueFormat = null;
+            }
+            else
+            {
+                valueFormat = content[(formatDelim + 1)..].ToString();
+                content = content[..formatDelim];
+            }
+
+            PropertyInfo? pInfo = typeof(T).GetProperty(content.ToString(), flags);
+            if (pInfo is null)
+            {
+                ThrowHelper.ThrowFormatException($"Property '{content.ToString()}' not found on type '{typeof(T).FullName}'.");
+            }
+
+            object? pValue = pInfo.GetValue(value);
+            if (pValue is not null)
+            {
+                if (valueFormat is not null && pValue is IFormattable formattable)
+                {
+                    builder.Append(formattable.ToString(valueFormat, formatProvider));
+                }
+                else
+                {
+                    builder.Append(pValue.ToString());
+                }
+            }
+
+            remaining = remaining[(start + end + 2)..];
         }
     }
-}
-
-file ref struct Token
-{
-    private readonly ReadOnlySpan<char> _content;
-
-    public TokenKey Key { get; }
-    public ReadOnlySpan<char> Format { get; }
-    public readonly bool HasSubKey => !_content.IsEmpty;
-    public bool HasFormat { get; }
-
-    public Token(ReadOnlySpan<char> content)
-    {
-        int delimiter = content.IndexOf(':');
-
-        if (delimiter == -1)
-        {
-            _content = content;
-            Format = [];
-            HasFormat = false;
-        }
-        else
-        {
-            _content = content[..delimiter];
-            Format = content[(delimiter + 1)..];
-            HasFormat = true;
-        }
-
-        Key = new TokenKey(_content);
-    }
-
-    public void ProcessSubKey()
-    {
-        Key = ProcessKey(ref _content);
-    }
-
-    private static TokenKey ProcessKey(ref ReadOnlySpan<char> content)
-    {
-        if (content.IsEmpty)
-        {
-            ThrowHelper.ThrowFormatException("Empty token.");
-        }
-
-        int subkeyDelimiter = content.IndexOf('.');
-
-        TokenKey key;
-
-        if (subkeyDelimiter == -1)
-        {
-            key = new(content);
-        }
-        else
-        {
-            key = new(content[..subkeyDelimiter]);
-            content = content[(subkeyDelimiter + 1)..];
-        }
-
-        return key;
-    }
-}
-
-file ref struct TokenKey
-{
-    public TokenKey(ReadOnlySpan<char> content)
-    {
-        int delimiter = content.IndexOf('?');
-
-        if (delimiter == -1)
-        {
-            Name = content;
-            Default = [];
-            HasDefault = false;
-        }
-        else
-        {
-            Name = content[..delimiter];
-            Default = content[(delimiter + 1)..];
-            HasDefault = true;
-        }
-
-        if (Name.IsEmpty)
-        {
-            ThrowHelper.ThrowFormatException("Empty token.");
-        }
-    }
-
-    public ReadOnlySpan<char> Name { get; }
-    public ReadOnlySpan<char> Default { get; }
-    public bool HasDefault { get; }
-}
-
-public enum FormatOptions
-{
-
 }

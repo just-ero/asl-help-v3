@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(SharedPath)\AslHelp.Ipc\AslHelp.Ipc.csproj" />
+    <ProjectReference Include="$(SharedPath)\AslHelp.Ipc.Mono\AslHelp.Ipc.Mono.csproj" />
   </ItemGroup>
 
 </Project>

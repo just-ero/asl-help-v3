@@ -1,7 +1,6 @@
 using System.IO.Pipes;
-using System.Runtime.CompilerServices;
 
-using AslHelp.Ipc.Mono.Api;
+using AslHelp.Ipc.Mono.Protocol;
 using AslHelp.Ipc.Responses;
 
 namespace AslHelp.Ipc.Mono;
@@ -14,25 +13,10 @@ public abstract class MonoServer : Server<MonoCommand>
     protected MonoServer(string pipeName, PipeOptions options)
         : base(pipeName, options) { }
 
-    [SkipLocalsInit]
-    protected sealed override void HandleCommand(MonoCommand command)
+    protected override IIpcResult HandleCommand(MonoCommand command)
     {
-        switch (command)
-        {
-            case MonoCommand.GetMonoImage:
-            {
-                Handle<GetMonoImage.ExitCode, GetMonoImage.Request, GetMonoImage.Response>(
-                    GetMonoImage,
-                    Api.GetMonoImage.ExitCode.Ok);
-                break;
-            }
-            default:
-            {
-                Unknown();
-                break;
-            }
-        }
+        throw new System.NotImplementedException();
     }
 
-    protected abstract IpcResult<GetMonoImage.ExitCode, GetMonoImage.Response> GetMonoImage(GetMonoImage.Request request);
+    protected abstract IpcResult<GetMonoImageExitCode, GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request);
 }

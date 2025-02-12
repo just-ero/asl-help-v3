@@ -14,9 +14,9 @@ public sealed class MonoClient : Client<MonoCommand>
     public MonoClient(string pipeName, PipeOptions options)
         : base(pipeName, options) { }
 
-    public Result<GetMonoImage.Response> GetMonoImage(string name)
+    public Result<Get.Response> GetMonoImage(string name)
     {
-        Unsafe.SkipInit(out GetMonoImage endpoint);
+        Unsafe.SkipInit(out Get endpoint);
         return CallEndpoint(endpoint,
             request: new(name));
     }

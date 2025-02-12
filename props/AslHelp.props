@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <LangVersion>12</LangVersion>
+    <LangVersion>13</LangVersion>
 
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- <GenerateDocumentationFile>true</GenerateDocumentationFile> -->
@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="$(MSBuildProjectName).UnitTests" />
+    <InternalsVisibleTo Include="$(MSBuildProjectName).Tests" />
   </ItemGroup>
 
 </Project>

@@ -56,4 +56,9 @@ public readonly struct IpcResult<TExitCode, TResponse> : IIpcResult<TExitCode, T
     {
         return new(code);
     }
+
+    public static implicit operator IpcResult<TExitCode, TResponse>(TResponse response)
+    {
+        return new(IpcExit<TExitCode>.Ok, response);
+    }
 }

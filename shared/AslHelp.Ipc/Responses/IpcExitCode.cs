@@ -1,15 +1,33 @@
-using AslHelp.Ipc.Errors;
+using System;
+
+using AslHelp.Ipc.Protocol;
 
 namespace AslHelp.Ipc.Responses;
 
-public enum IpcExitCode : sbyte
+internal enum IpcExitCode : sbyte
 {
-    [Err("Unhandled exception occurred.")]
     UnhandledException = -1,
-
-    [Err("Request code was not known by the server.")]
     UnknownRequest = -2,
-
-    [Err("Packet was null or otherwise invalid.")]
     InvalidPacket = -3
+}
+
+internal readonly struct IpcExitCodeDescriptor : IExitCodeDescriptor<IpcExitCode>
+{
+    public IpcExitCode Ok => throw new NotImplementedException();
+
+    public bool IsOk(IpcExitCode exitCode)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string GetMessage(IpcExitCode exitCode)
+    {
+        return exitCode switch
+        {
+            IpcExitCode.UnhandledException => "An unhandled exception occurred.",
+            IpcExitCode.UnknownRequest => "An unknown request was received.",
+            IpcExitCode.InvalidPacket => "An invalid packet was received.",
+            _ => $"Unknown exit code: {exitCode}."
+        };
+    }
 }
