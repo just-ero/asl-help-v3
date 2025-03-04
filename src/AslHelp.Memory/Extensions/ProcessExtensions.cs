@@ -145,7 +145,7 @@ public static class ProcessExtensions
         return modules;
     }
 
-    public static IEnumerable<MemoryPage> GetMemoryPages(this Process process, Func<Mbi, bool>? filter = null)
+    public static IEnumerable<MemoryRange> GetMemoryRanges(this Process process, Func<Mbi, bool>? filter = null)
     {
         if (!process.Is64Bit()
             .TryUnwrap(out bool is64Bit, out _))

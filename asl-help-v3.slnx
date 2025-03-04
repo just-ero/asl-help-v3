@@ -1,0 +1,24 @@
+<Solution>
+
+  <Folder Name="/native/">
+    <Project Path="native/AslHelp.Native/AslHelp.Native.csproj" />
+  </Folder>
+
+  <Folder Name="/shared/">
+    <Project Path="shared/AslHelp.Ipc/AslHelp.Ipc.csproj" />
+    <Project Path="shared/AslHelp.Ipc.Mono/AslHelp.Ipc.Mono.csproj" />
+    <Project Path="shared/AslHelp.Shared/AslHelp.Shared.csproj" />
+  </Folder>
+
+  <Folder Name="/src/">
+    <Project Path="src/AslHelp.Collections/AslHelp.Collections.csproj" />
+    <Project Path="src/AslHelp.IO/AslHelp.IO.csproj" />
+    <Project Path="src/AslHelp.Memory/AslHelp.Memory.csproj" />
+  </Folder>
+
+  <Folder Name="/test/">
+    <Project Path="test/AslHelp.Shared.Tests/AslHelp.Shared.Tests.csproj" />
+    <Project Path="test/AslHelp.TestApp/AslHelp.TestApp.csproj" />
+  </Folder>
+
+</Solution>

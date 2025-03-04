@@ -3,9 +3,9 @@ using AslHelp.Memory.Native.Structs;
 
 namespace AslHelp.Memory;
 
-public readonly struct MemoryPage
+public readonly struct MemoryRange
 {
-    public MemoryPage(nuint @base, uint regionSize, MemoryRangeProtect protect, MemoryRangeState state, MemoryRangeType type)
+    public MemoryRange(nuint @base, uint regionSize, MemoryRangeProtect protect, MemoryRangeState state, MemoryRangeType type)
     {
         Base = @base;
         RegionSize = regionSize;
@@ -14,7 +14,7 @@ public readonly struct MemoryPage
         Type = type;
     }
 
-    internal unsafe MemoryPage(MemoryBasicInformation mbi)
+    internal unsafe MemoryRange(MemoryBasicInformation mbi)
     {
         Base = (nuint)mbi.BaseAddress;
         RegionSize = (uint)mbi.RegionSize;
@@ -32,6 +32,6 @@ public readonly struct MemoryPage
 
     public override string ToString()
     {
-        return $"{nameof(MemoryPage)} {{ {nameof(Base)} = 0x{(ulong)Base:X}, {nameof(RegionSize)} = 0x{RegionSize:X} }}";
+        return $"{nameof(MemoryRange)} {{ {nameof(Base)} = 0x{(ulong)Base:X}, {nameof(RegionSize)} = 0x{RegionSize:X} }}";
     }
 }

@@ -21,7 +21,7 @@ namespace AslHelp.Memory.Extensions;
 
 public static class ModuleExtensions
 {
-    public static IEnumerable<MemoryPage> GetMemoryPages(this Module module, Func<Mbi, bool>? filter = null)
+    public static IEnumerable<MemoryRange> GetMemoryRanges(this Module module, Func<Mbi, bool>? filter = null)
     {
         nuint processHandle = (nuint)(nint)module.Parent.Handle;
         nuint address = module.Base, max = module.Base + module.MemorySize;
