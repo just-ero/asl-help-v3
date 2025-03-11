@@ -1,13 +1,9 @@
 using System.Text.Json.Serialization;
 
-using AslHelp.Ipc.Mono.Requests;
-using AslHelp.Ipc.Mono.Responses;
+using AslHelp.Ipc.Mono.Transmission;
 
 namespace AslHelp.Ipc.Mono;
 
-[JsonSerializable(typeof(IpcRequestMessage<MonoRequestBase>))]
-[JsonSerializable(typeof(IpcRequestMessage<GetMonoImageRequest>))]
-
-[JsonSerializable(typeof(IpcRequestMessage<MonoResponseBase>))]
-[JsonSerializable(typeof(IpcRequestMessage<GetMonoImageResponse>))]
+[JsonSerializable(typeof(IpcRequestMessage<IMonoRequest<IMonoResponse>>))]
+[JsonSerializable(typeof(IpcResponseMessage<IMonoResponse>))]
 public sealed partial class MonoSerializerContext : JsonSerializerContext;

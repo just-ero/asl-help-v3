@@ -1,8 +1,8 @@
 ﻿using System;
 
 using AslHelp.Ipc.Mono;
-using AslHelp.Ipc.Mono.Requests;
-using AslHelp.Ipc.Mono.Responses;
+using AslHelp.Ipc.Mono.Transmission.Commands;
+using AslHelp.Shared.Results;
 
 using var monoServer = new DummyMonoServer("asl-help-pipe");
 using var monoClient = new MonoClient("asl-help-pipe");
@@ -12,16 +12,16 @@ monoClient.Connect();
 await connection;
 
 var process = monoServer.ProcessMessage();
-monoClient.GetMonoImage("test");
+var res = monoClient.GetMonoImage(new("test"));
 await process;
 
-Console.WriteLine("Done.");
+Console.WriteLine(res.Value);
 
 public sealed class DummyMonoServer(string pipeName) : MonoServer(pipeName)
 {
-    public override GetMonoImageResponse Handle(GetMonoImageRequest request)
+    public override Result<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request)
     {
         Console.WriteLine($"Handling {request}...");
-        return new GetMonoImageResponse();
+        return new GetMonoImageResponse(0, "fart", "poop", "shit");
     }
 }

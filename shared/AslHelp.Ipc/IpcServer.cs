@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 using AslHelp.Ipc.Serialization;
+using AslHelp.Shared.Results;
 
 namespace AslHelp.Ipc;
 
@@ -36,18 +37,21 @@ public abstract class IpcServer<TRequestPayloadBase, TResponsePayloadBase> : IDi
     {
         Console.WriteLine("Waiting for message...");
 
+        var reqMsg = await IpcSerializer.DeserializeAsync<IpcRequestMessage<TRequestPayloadBase>>(_pipe, SerializerContext);
+        if (reqMsg is not { Payload: { } payload })
+        {
+            Console.WriteLine("Received null message.");
+            return;
+        }
+
+        Console.WriteLine($"Received {payload}.");
+
         try
         {
-            var message = await IpcSerializer.DeserializeAsync<IpcRequestMessage<TRequestPayloadBase>>(_pipe, SerializerContext);
-            if (message is null)
-            {
-                Console.WriteLine("Received null message.");
-                return;
-            }
+            var result = HandleMessage(payload);
+            var resMsg = IpcResponseMessage<TResponsePayloadBase>.FromResult(result);
 
-            Console.WriteLine($"Received {message.Payload}.");
-
-            HandleMessage(message);
+            IpcSerializer.Serialize(_pipe, resMsg, SerializerContext);
         }
         catch (Exception e)
         {
@@ -55,13 +59,7 @@ public abstract class IpcServer<TRequestPayloadBase, TResponsePayloadBase> : IDi
         }
     }
 
-    protected abstract void HandleMessage(IpcRequestMessage<TRequestPayloadBase> message);
-
-    protected async Task SendMessage<TResponse>(IpcRequestMessage<TResponse> message)
-        where TResponse : TResponsePayloadBase
-    {
-        await IpcSerializer.SerializeAsync(_pipe, message, SerializerContext);
-    }
+    protected abstract IResult<TResponsePayloadBase> HandleMessage(TRequestPayloadBase payload);
 
     public void Dispose()
     {

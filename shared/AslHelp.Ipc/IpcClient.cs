@@ -1,9 +1,10 @@
 using System;
 using System.IO.Pipes;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using AslHelp.Ipc.Errors;
 using AslHelp.Ipc.Serialization;
+using AslHelp.Shared.Results;
 
 namespace AslHelp.Ipc;
 
@@ -23,22 +24,33 @@ public abstract class IpcClient<TRequestPayloadBase, TResponsePayloadBase> : IDi
 
     public void Connect()
     {
-        Console.WriteLine("Connecting...");
         _pipe.Connect();
     }
 
-    protected void SendMessage(IpcRequestMessage<TRequestPayloadBase> message)
-    {
-        Console.WriteLine("Sending message...");
-        IpcSerializer.Serialize(_pipe, message, SerializerContext);
-
-        Console.WriteLine("Message sent.");
-    }
-
-    protected IpcRequestMessage<TResponse>? ReceiveMessage<TResponse>()
+    protected Result<TResponse> Transmit<TResponse>(TRequestPayloadBase request)
         where TResponse : TResponsePayloadBase
     {
-        return (IpcRequestMessage<TResponse>?)JsonSerializer.Deserialize(_pipe, typeof(IpcRequestMessage<TResponse>), SerializerContext);
+        IpcRequestMessage<TRequestPayloadBase> requestMessage = new(request);
+        IpcSerializer.Serialize(_pipe, requestMessage, SerializerContext);
+        System.Console.WriteLine("");
+
+        var responseMessage = IpcSerializer.Deserialize<IpcResponseMessage<TResponsePayloadBase>>(_pipe, SerializerContext);
+        if (responseMessage is null)
+        {
+            return IpcError.NullResponse;
+        }
+
+        if (responseMessage.Error is not null)
+        {
+            return IpcError.Other(responseMessage.Error);
+        }
+
+        if (responseMessage.Payload is not TResponse response)
+        {
+            return IpcError.NullResponse;
+        }
+
+        return response;
     }
 
     public void Dispose()

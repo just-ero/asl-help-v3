@@ -1,23 +1,22 @@
-using System;
 using System.Text.Json.Serialization;
 
-using AslHelp.Ipc.Mono.Requests;
-using AslHelp.Ipc.Mono.Responses;
+using AslHelp.Ipc.Mono.Transmission;
+using AslHelp.Ipc.Mono.Transmission.Commands;
+using AslHelp.Shared.Results;
 
 namespace AslHelp.Ipc.Mono;
 
-public abstract class MonoServer : IpcServer<MonoRequestBase, MonoResponseBase>, IMonoRequestVisitor
+public abstract class MonoServer : IpcServer<IMonoRequest<IMonoResponse>, IMonoResponse>, IMonoVisitor
 {
     public MonoServer(string pipeName)
         : base(pipeName) { }
 
     protected override JsonSerializerContext SerializerContext { get; } = new MonoSerializerContext();
 
-    protected sealed override void HandleMessage(IpcRequestMessage<MonoRequestBase> message)
+    protected sealed override IResult<IMonoResponse> HandleMessage(IMonoRequest<IMonoResponse> payload)
     {
-        Console.WriteLine("Handling message...");
-        message.Payload.Visit(this);
+        return payload.Visit(this);
     }
 
-    public abstract GetMonoImageResponse Handle(GetMonoImageRequest request);
+    public abstract Result<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request);
 }

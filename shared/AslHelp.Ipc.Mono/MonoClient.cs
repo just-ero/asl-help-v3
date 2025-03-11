@@ -1,12 +1,13 @@
 using System.IO.Pipes;
 using System.Text.Json.Serialization;
 
-using AslHelp.Ipc.Mono.Requests;
-using AslHelp.Ipc.Mono.Responses;
+using AslHelp.Ipc.Mono.Transmission;
+using AslHelp.Ipc.Mono.Transmission.Commands;
+using AslHelp.Shared.Results;
 
 namespace AslHelp.Ipc.Mono;
 
-public sealed class MonoClient : IpcClient<MonoRequestBase, MonoResponseBase>
+public sealed class MonoClient : IpcClient<IMonoRequest<IMonoResponse>, IMonoResponse>, IMonoVisitor
 {
     public MonoClient(string pipeName)
         : base(pipeName) { }
@@ -16,8 +17,8 @@ public sealed class MonoClient : IpcClient<MonoRequestBase, MonoResponseBase>
 
     protected override JsonSerializerContext SerializerContext { get; } = new MonoSerializerContext();
 
-    public void GetMonoImage(string name)
+    public Result<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request)
     {
-        SendMessage(new(new GetMonoImageRequest(name)));
+        return Transmit<GetMonoImageResponse>(request);
     }
 }
