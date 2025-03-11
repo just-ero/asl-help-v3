@@ -12,10 +12,10 @@ public abstract class IpcServer<TRequestPayloadBase, TResponsePayloadBase> : IDi
 {
     private readonly NamedPipeServerStream _pipe;
 
-    public IpcServer(string pipeName)
+    protected IpcServer(string pipeName)
         : this(pipeName, PipeOptions.None) { }
 
-    public IpcServer(string pipeName, PipeOptions options)
+    protected IpcServer(string pipeName, PipeOptions options)
     {
         _pipe = new(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, options);
     }
