@@ -32,7 +32,6 @@ public abstract class IpcClient<TRequestPayloadBase, TResponsePayloadBase> : IDi
     {
         IpcRequestMessage<TRequestPayloadBase> requestMessage = new(request);
         IpcSerializer.Serialize(_pipe, requestMessage, SerializerContext);
-        System.Console.WriteLine("");
 
         var responseMessage = IpcSerializer.Deserialize<IpcResponseMessage<TResponsePayloadBase>>(_pipe, SerializerContext);
         if (responseMessage is null)

@@ -1,7 +1,7 @@
 ﻿using System;
 
 using AslHelp.Ipc.Mono;
-using AslHelp.Ipc.Mono.Transmission.Commands;
+using AslHelp.Ipc.Mono.Commands;
 using AslHelp.Shared.Results;
 
 using var monoServer = new DummyMonoServer("asl-help-pipe");

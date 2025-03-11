@@ -1,7 +1,7 @@
-using AslHelp.Ipc.Mono.Transmission.Commands;
+using AslHelp.Ipc.Mono.Commands;
 using AslHelp.Shared.Results;
 
-namespace AslHelp.Ipc.Mono.Transmission;
+namespace AslHelp.Ipc.Mono;
 
 public interface IMonoVisitor
 {

@@ -1,6 +1,6 @@
 using AslHelp.Shared.Results;
 
-namespace AslHelp.Ipc.Mono.Transmission.Commands;
+namespace AslHelp.Ipc.Mono.Commands;
 
 public sealed record GetMonoImageRequest(
     string Name) : IMonoRequest<GetMonoImageResponse>
