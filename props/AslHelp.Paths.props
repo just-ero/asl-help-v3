@@ -6,7 +6,6 @@
     <ImplPath>$(RootPath)/impl</ImplPath>
     <IpcPath>$(RootPath)/ipc</IpcPath>
     <LibPath>$(RootPath)/lib</LibPath>
-    <NativePath>$(RootPath)/native</NativePath>
     <SrcPath>$(RootPath)/src</SrcPath>
     <TestPath>$(RootPath)/test</TestPath>
 

@@ -33,23 +33,23 @@ public abstract class IpcClient<TRequestPayloadBase, TResponsePayloadBase> : IDi
         IpcRequestMessage<TRequestPayloadBase> requestMessage = new(request);
         IpcSerializer.Serialize(_pipe, requestMessage, SerializerContext);
 
-        var responseMessage = IpcSerializer.Deserialize<IpcResponseMessage<TResponsePayloadBase>>(_pipe, SerializerContext);
-        if (responseMessage is null)
+        var res = IpcSerializer.Deserialize<IpcResponseMessage<TResponsePayloadBase>>(_pipe, SerializerContext);
+        if (res is null)
         {
             return IpcError.NullResponse;
         }
-
-        if (responseMessage.Error is not null)
+        else if (res.Data is TResponse data)
         {
-            return IpcError.Other(responseMessage.Error);
+            return data;
         }
-
-        if (responseMessage.Payload is not TResponse response)
+        else if (res.Error is not null)
+        {
+            return IpcError.Other(res.Error);
+        }
+        else
         {
             return IpcError.NullResponse;
         }
-
-        return response;
     }
 
     public void Dispose()

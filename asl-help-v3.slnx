@@ -1,12 +1,9 @@
 <Solution>
 
-  <Folder Name="/native/">
-    <Project Path="native/AslHelp.Native/AslHelp.Native.csproj" />
-  </Folder>
-
   <Folder Name="/ipc/">
     <Project Path="ipc/AslHelp.Ipc/AslHelp.Ipc.csproj" />
     <Project Path="ipc/AslHelp.Ipc.Mono/AslHelp.Ipc.Mono.csproj" />
+    <Project Path="ipc/AslHelp.Ipc.Native/AslHelp.Ipc.Native.csproj" />
   </Folder>
 
   <Folder Name="/src/">

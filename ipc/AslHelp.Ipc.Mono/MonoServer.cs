@@ -1,6 +1,7 @@
 using System.IO.Pipes;
 using System.Text.Json.Serialization;
 
+using AslHelp.IO.Logging;
 using AslHelp.Ipc.Mono.Commands;
 using AslHelp.Shared.Results;
 
@@ -8,11 +9,11 @@ namespace AslHelp.Ipc.Mono;
 
 public abstract class MonoServer : IpcServer<IMonoRequest<IMonoResponse>, IMonoResponse>, IMonoVisitor
 {
-    protected MonoServer(string pipeName)
-        : base(pipeName) { }
+    protected MonoServer(string pipeName, Logger? logger = null)
+        : base(pipeName, logger) { }
 
-    protected MonoServer(string pipeName, PipeOptions options)
-        : base(pipeName, options) { }
+    protected MonoServer(string pipeName, PipeOptions options, Logger? logger = null)
+        : base(pipeName, options, logger) { }
 
     protected override JsonSerializerContext SerializerContext { get; } = new MonoSerializerContext();
 

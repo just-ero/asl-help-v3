@@ -1,36 +1,100 @@
+using System;
+using System.IO;
+using System.Runtime.CompilerServices;
+
 namespace AslHelp.IO.Logging;
 
 public abstract class Logger
 {
     public LoggerVerbosity Verbosity { get; set; }
+#if DEBUG
+        = LoggerVerbosity.Detailed;
+#endif
 
-    protected abstract void Log(string message);
+    public LogFormat OutputFormat { get; set; }
+#if DEBUG
+        = LogFormat.ShowTimestamp | LogFormat.ShowMember | LogFormat.ShowLocation;
+#endif
 
-    public void Log(LoggerVerbosity verbosity, string message)
+    protected abstract void WriteLine(string output);
+
+    private void LogInternal(string message, string member, string file, int line)
     {
-        if (verbosity >= Verbosity)
+        if ((OutputFormat & LogFormat.ShowTimestamp) != 0)
         {
-            Log(message);
+            WriteLine($"[{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}");
+        }
+        else
+        {
+            WriteLine(message);
+        }
+
+        if ((OutputFormat & LogFormat.ShowMember) != 0)
+        {
+            if ((OutputFormat & LogFormat.ShowLocation) != 0)
+            {
+                WriteLine($"                             in {member} at {Path.GetFileName(file)}:{line}");
+            }
+            else
+            {
+                WriteLine($"                             in {member}");
+            }
+        }
+        else
+        {
+            if ((OutputFormat & LogFormat.ShowLocation) != 0)
+            {
+                WriteLine($"                             at {Path.GetFileName(file)}:{line}");
+            }
         }
     }
 
-    public void LogDetail(string message)
+    public void Log(
+        LoggerVerbosity verbosity,
+        string message,
+        [CallerMemberName] string member = "",
+        [CallerFilePath] string file = "",
+        [CallerLineNumber] int line = 0)
     {
-        Log(LoggerVerbosity.Detailed, message);
+        if (verbosity >= Verbosity)
+        {
+            LogInternal(message, member, file, line);
+        }
     }
 
-    public void LogInfo(string message)
+    public void LogDetail(
+        string message,
+        [CallerMemberName] string member = "",
+        [CallerFilePath] string file = "",
+        [CallerLineNumber] int line = 0)
     {
-        Log(LoggerVerbosity.Info, message);
+        Log(LoggerVerbosity.Detailed, message, member, file, line);
     }
 
-    public void LogWarning(string message)
+    public void LogInfo(
+        string message,
+        [CallerMemberName] string member = "",
+        [CallerFilePath] string file = "",
+        [CallerLineNumber] int line = 0)
     {
-        Log(LoggerVerbosity.Warn, message);
+        Log(LoggerVerbosity.Info, message, member, file, line);
     }
 
-    public void LogError(string message)
+    public void LogWarning(
+        string message,
+        [CallerMemberName] string member = "",
+        [CallerFilePath] string file = "",
+        [CallerLineNumber] int line = 0)
     {
-        Log(LoggerVerbosity.Error, message);
+        Log(LoggerVerbosity.Warning, message, member, file, line);
+    }
+
+    public void LogCritical(
+        string message,
+        [CallerMemberName] string member = "",
+        [CallerFilePath] string file = "",
+        [CallerLineNumber] int line = 0)
+    {
+        Log(LoggerVerbosity.Critical, message, member, file, line);
     }
 }

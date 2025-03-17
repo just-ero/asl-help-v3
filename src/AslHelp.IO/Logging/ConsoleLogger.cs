@@ -1,11 +1,11 @@
-using System.Diagnostics;
+using System;
 
 namespace AslHelp.IO.Logging;
 
-public sealed class DebugLogger : Logger
+public sealed class ConsoleLogger : Logger
 {
     protected override void WriteLine(string output)
     {
-        Debug.WriteLine(output);
+        Console.WriteLine(output);
     }
 }

@@ -1,27 +1,21 @@
 ﻿using System;
+using System.Diagnostics;
 
+using AslHelp.Ipc;
 using AslHelp.Ipc.Mono;
-using AslHelp.Ipc.Mono.Commands;
-using AslHelp.Shared.Results;
+using AslHelp.Memory.Extensions;
 
-using var monoServer = new DummyMonoServer("asl-help-pipe");
-using var monoClient = new MonoClient("asl-help-pipe");
+const string DllPath = @"C:\Users\Ero\Desktop\code\.just-ero\asl-help-v3\artifacts\publish\AslHelp.Ipc.Native\debug_win-x86\AslHelp.Ipc.Native.dll";
 
-var connection = monoServer.WaitForConnectionAsync();
-monoClient.Connect();
-await connection;
+using var game = Process.GetProcessesByName("ElenaTemple")[0];
 
-var process = monoServer.ProcessMessage();
-var res = monoClient.GetMonoImage(new("test"));
-await process;
+var dll = game.Inject(DllPath).Unwrap();
+var ret = dll.CallRemoteFunction(IpcConnection.EntryPoint, 0).Unwrap();
 
-Console.WriteLine(res.Value);
+using var client = new MonoClient(IpcConnection.PipeName);
+client.Connect();
 
-public sealed class DummyMonoServer(string pipeName) : MonoServer(pipeName)
-{
-    public override Result<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request)
-    {
-        Console.WriteLine($"Handling {request}...");
-        return new GetMonoImageResponse(0, "fart", "poop", "shit");
-    }
-}
+var image = client.GetMonoImage(new("Assembly-CSharp")).Unwrap();
+Console.WriteLine(image);
+
+dll.Eject();

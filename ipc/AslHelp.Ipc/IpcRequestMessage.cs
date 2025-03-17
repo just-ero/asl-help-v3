@@ -1,4 +1,4 @@
 namespace AslHelp.Ipc;
 
-public sealed record IpcRequestMessage<TPayload>(
-    TPayload Payload);
+public sealed record IpcRequestMessage<T>(
+    T Data);

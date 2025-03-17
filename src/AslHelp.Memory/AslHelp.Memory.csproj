@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(SrcPath)/AslHelp.Collections/AslHelp.Collections.csproj" />
-    <ProjectReference Include="$(SharedPath)/AslHelp.Shared/AslHelp.Shared.csproj" />
+    <ProjectReference Include="$(SrcPath)/AslHelp.Shared/AslHelp.Shared.csproj" />
   </ItemGroup>
 
 </Project>

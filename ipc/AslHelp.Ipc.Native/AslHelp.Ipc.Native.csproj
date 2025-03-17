@@ -13,7 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(IpcPath)/AslHelp.Ipc/AslHelp.Ipc.csproj" />
     <ProjectReference Include="$(IpcPath)/AslHelp.Ipc.Mono/AslHelp.Ipc.Mono.csproj" />
   </ItemGroup>
 

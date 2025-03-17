@@ -1,28 +1,30 @@
+using AslHelp.IO.Logging;
+using AslHelp.Ipc;
 using AslHelp.Ipc.Mono;
 using AslHelp.Ipc.Mono.Commands;
 using AslHelp.Shared.Results;
 
 namespace AslHelp.Native.Mono;
 
-internal sealed class NativeMonoServer() : MonoServer("asl-help")
+internal sealed class NativeMonoServer(Logger? logger = null) : MonoServer(IpcConnection.PipeName, logger)
 {
     protected override Result<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request)
     {
-        Output.Log($"[GetMonoImage] Request: {request.Name}");
+        Logger?.LogDetail($"Getting image '{request.Name}'...");
 
         nuint image = MonoApi.MonoImage_Loaded(request.Name);
         if (image == 0)
         {
-            Output.Log("[GetMonoImage]   => Failure!");
-            return GetMonoImageExitCode.NotFound;
+            Logger?.LogDetail("   => Failure!");
+            return GetMonoImageError.NotFound(request.Name);
         }
 
-        Output.Log($"[GetMonoImage]   => Success: 0x{image:X}.");
+        Logger?.LogDetail($"   => Success: 0x{image:X}.");
 
         return new GetMonoImageResponse(
             image,
-            MonoApi.MonoImage_GetName(image),
-            MonoApi.MonoImage_GetName(image) + ".dll",
+            request.Name,
+            request.Name + ".dll",
             MonoApi.MonoImage_GetFileName(image));
     }
 }

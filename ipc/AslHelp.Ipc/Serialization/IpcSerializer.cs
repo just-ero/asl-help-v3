@@ -4,7 +4,10 @@ using System.Buffers.Binary;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
+
+using AslHelp.Shared;
 
 namespace AslHelp.Ipc.Serialization;
 
@@ -23,15 +26,15 @@ internal static class IpcSerializer
         ArrayPool<byte>.Shared.Return(rented);
     }
 
-    public static async Task SerializeAsync<T>(Stream stream, T value, JsonSerializerContext context)
+    public static async Task SerializeAsync<T>(Stream stream, T value, JsonSerializerContext context, CancellationToken ct)
     {
         byte[] bytes = JsonSerializer.SerializeToUtf8Bytes(value, typeof(T), context);
 
         byte[] rented = ArrayPool<byte>.Shared.Rent(sizeof(int));
         BinaryPrimitives.WriteInt32LittleEndian(rented, bytes.Length);
 
-        await stream.WriteAsync(rented, 0, sizeof(int));
-        await stream.WriteAsync(bytes, 0, bytes.Length);
+        await stream.WriteAsync(rented, 0, sizeof(int), ct);
+        await stream.WriteAsync(bytes, 0, bytes.Length, ct);
 
         ArrayPool<byte>.Shared.Return(rented);
     }
@@ -41,7 +44,8 @@ internal static class IpcSerializer
         byte[] rented = ArrayPool<byte>.Shared.Rent(sizeof(int));
         if (stream.Read(rented, 0, sizeof(int)) != sizeof(int))
         {
-            throw new EndOfStreamException();
+            const string Msg = "The stream didn't contain enough data to read the requested item.";
+            ThrowHelper.ThrowEndOfStreamException(Msg);
         }
 
         int length = BinaryPrimitives.ReadInt32LittleEndian(rented);
@@ -50,7 +54,8 @@ internal static class IpcSerializer
         byte[] buffer = ArrayPool<byte>.Shared.Rent(length);
         if (stream.Read(buffer, 0, length) != length)
         {
-            throw new EndOfStreamException();
+            const string Msg = "The stream didn't contain enough data to read the requested item.";
+            ThrowHelper.ThrowEndOfStreamException(Msg);
         }
 
         object? value = JsonSerializer.Deserialize(buffer.AsSpan(0, length), typeof(T), context);
@@ -59,21 +64,23 @@ internal static class IpcSerializer
         return (T?)value;
     }
 
-    public static async Task<T?> DeserializeAsync<T>(Stream stream, JsonSerializerContext context)
+    public static async Task<T?> DeserializeAsync<T>(Stream stream, JsonSerializerContext context, CancellationToken ct)
     {
         byte[] rented = ArrayPool<byte>.Shared.Rent(sizeof(int));
-        if (await stream.ReadAsync(rented, 0, sizeof(int)) != sizeof(int))
+        if (await stream.ReadAsync(rented, 0, sizeof(int), ct) != sizeof(int))
         {
-            throw new EndOfStreamException();
+            const string Msg = "The stream didn't contain enough data to read the requested item.";
+            ThrowHelper.ThrowEndOfStreamException(Msg);
         }
 
         int length = BinaryPrimitives.ReadInt32LittleEndian(rented);
         ArrayPool<byte>.Shared.Return(rented);
 
         byte[] buffer = ArrayPool<byte>.Shared.Rent(length);
-        if (await stream.ReadAsync(buffer, 0, length) != length)
+        if (await stream.ReadAsync(buffer, 0, length, ct) != length)
         {
-            throw new EndOfStreamException();
+            const string Msg = "The stream didn't contain enough data to read the requested item.";
+            ThrowHelper.ThrowEndOfStreamException(Msg);
         }
 
         object? value = JsonSerializer.Deserialize(buffer.AsSpan(0, length), typeof(T), context);

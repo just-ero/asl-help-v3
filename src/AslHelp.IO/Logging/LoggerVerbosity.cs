@@ -4,7 +4,7 @@ public enum LoggerVerbosity
 {
     Detailed,
     Info,
-    Warn,
-    Error,
+    Warning,
+    Critical,
     Quiet
 }

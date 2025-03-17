@@ -71,6 +71,20 @@ public static partial class ThrowHelper
     }
 
     /// <summary>
+    ///     Throws a <see cref="EndOfStreamException"/> with a specified error message.
+    /// </summary>
+    /// <param name="message">The error message that explains the reason for the exception.</param>
+    /// <remarks>
+    ///     This method does not return and is not inlined to improve codegen of cold paths.
+    /// </remarks>
+    /// <exception cref="EndOfStreamException"/>
+    [DoesNotReturn]
+    public static void ThrowEndOfStreamException(string message)
+    {
+        throw new EndOfStreamException(message);
+    }
+
+    /// <summary>
     ///     Throws an <see cref="Exception"/> with a specified error message.
     /// </summary>
     /// <param name="message">The error message that explains the reason for the exception.</param>

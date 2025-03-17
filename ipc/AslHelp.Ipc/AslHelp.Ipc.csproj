@@ -5,6 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="AslHelp.TestApp" />
+    <InternalsVisibleTo Include="AslHelp.Ipc.Native" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="$(SrcPath)/AslHelp.IO/AslHelp.IO.csproj" />
     <ProjectReference Include="$(SrcPath)/AslHelp.Shared/AslHelp.Shared.csproj" />
   </ItemGroup>
