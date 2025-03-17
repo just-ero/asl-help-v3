@@ -2,10 +2,9 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 using AslHelp.IO.Logging;
-using AslHelp.Ipc;
-using AslHelp.Native.Mono;
+using AslHelp.Ipc.Native.Mono;
 
-namespace AslHelp.Native;
+namespace AslHelp.Ipc.Native;
 
 internal static partial class Exports
 {
@@ -24,11 +23,8 @@ internal static partial class Exports
         _logger = new();
         _logger.LogDetail("Starting IPC server...");
 
-        _serverTask = Task.Run(() =>
-        {
-            NativeMonoServer server = new(_logger);
-            server.Start();
-        });
+        NativeMonoServer server = new(_logger);
+        _serverTask = server.RunAsync();
 
         _logger.LogDetail("IPC server started.");
         return true;

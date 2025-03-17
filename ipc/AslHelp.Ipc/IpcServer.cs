@@ -27,7 +27,7 @@ public abstract class IpcServer<TRequestPayloadBase, TResponsePayloadBase> : IDi
 
     protected abstract JsonSerializerContext SerializerContext { get; }
 
-    public void Start()
+    public void Run()
     {
         Logger?.LogDetail("Server started.");
 
