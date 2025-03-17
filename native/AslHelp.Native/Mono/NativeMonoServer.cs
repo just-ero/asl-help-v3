@@ -1,16 +1,12 @@
-using AslHelp.Ipc;
 using AslHelp.Ipc.Mono;
-using AslHelp.Ipc.Mono.Protocol;
-using AslHelp.Ipc.Responses;
+using AslHelp.Ipc.Mono.Commands;
+using AslHelp.Shared.Results;
 
 namespace AslHelp.Native.Mono;
 
-internal sealed class NativeMonoServer : MonoServer
+internal sealed class NativeMonoServer() : MonoServer("asl-help")
 {
-    public NativeMonoServer()
-        : base(ApiResourceStrings.PipeName) { }
-
-    protected override IpcResult<GetMonoImageExitCode, GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request)
+    protected override Result<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request)
     {
         Output.Log($"[GetMonoImage] Request: {request.Name}");
 
@@ -28,22 +24,5 @@ internal sealed class NativeMonoServer : MonoServer
             MonoApi.MonoImage_GetName(image),
             MonoApi.MonoImage_GetName(image) + ".dll",
             MonoApi.MonoImage_GetFileName(image));
-    }
-
-    protected override IpcResult<GetMonoClassResponse> GetMonoClass(GetMonoClassRequest request)
-    {
-        Output.Log($"[GetMonoClass] Request: {string.Join('.', request.Namespace, request.Name)}");
-
-        nuint klass = MonoApi.MonoClass_FromName((nuint)request.Image, request.Namespace, request.Name);
-        if (klass == 0)
-        {
-            Output.Log("[GetMonoClass]   => Failure!");
-            return IpcExitCode.MonoClass_NotFound;
-        }
-
-        Output.Log($"[GetMonoClass]   => Success: 0x{klass:X}.");
-
-        return new GetMonoClassResponse(
-            klass);
     }
 }

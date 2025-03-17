@@ -4,5 +4,5 @@ namespace AslHelp.Ipc;
 
 public interface IRequest<out TResponse, TVisitor>
 {
-    IResult<TResponse> Visit(TVisitor visitor);
+    IResult<TResponse> Handle(TVisitor visitor);
 }

@@ -3,6 +3,7 @@ using System.IO.Pipes;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
+using AslHelp.IO.Logging;
 using AslHelp.Ipc.Serialization;
 using AslHelp.Shared.Results;
 
@@ -10,27 +11,40 @@ namespace AslHelp.Ipc;
 
 public abstract class IpcServer<TRequestPayloadBase, TResponsePayloadBase> : IDisposable
 {
+    private readonly string _name;
+
     private readonly NamedPipeServerStream _pipe;
+    private readonly Logger? _logger;
 
-    protected IpcServer(string pipeName)
-        : this(pipeName, PipeOptions.None) { }
+    protected IpcServer(string pipeName, Logger? logger = null)
+        : this(pipeName, PipeOptions.None, logger) { }
 
-    protected IpcServer(string pipeName, PipeOptions options)
+    protected IpcServer(string pipeName, PipeOptions options, Logger? logger = null)
     {
+        _name = GetType().Name;
+
         _pipe = new(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, options);
+        _logger = logger;
     }
 
     protected abstract JsonSerializerContext SerializerContext { get; }
 
     public void WaitForConnection()
     {
+        _logger?.LogDetail($"[{_name}] [WaitForConnection] Waiting for connection...");
+
         _pipe.WaitForConnection();
+
+        _logger?.LogDetail($"[{_name}] [WaitForConnection] Connected.");
     }
 
     public async Task WaitForConnectionAsync()
     {
+        _logger?.LogDetail($"[{_name}] [WaitForConnectionAsync] Waiting for connection...");
+
         await _pipe.WaitForConnectionAsync();
-        Console.WriteLine("Connected.");
+
+        _logger?.LogDetail($"[{_name}] [WaitForConnectionAsync] Connected.");
     }
 
     public async Task ProcessMessage()
@@ -48,7 +62,7 @@ public abstract class IpcServer<TRequestPayloadBase, TResponsePayloadBase> : IDi
 
         try
         {
-            var result = HandleMessage(payload);
+            var result = HandleRequest(payload);
             var resMsg = IpcResponseMessage<TResponsePayloadBase>.FromResult(result);
 
             IpcSerializer.Serialize(_pipe, resMsg, SerializerContext);
@@ -59,7 +73,7 @@ public abstract class IpcServer<TRequestPayloadBase, TResponsePayloadBase> : IDi
         }
     }
 
-    protected abstract IResult<TResponsePayloadBase> HandleMessage(TRequestPayloadBase payload);
+    protected abstract IResult<TResponsePayloadBase> HandleRequest(TRequestPayloadBase request);
 
     public void Dispose()
     {

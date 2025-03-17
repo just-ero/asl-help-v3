@@ -16,10 +16,15 @@ public abstract class MonoServer : IpcServer<IMonoRequest<IMonoResponse>, IMonoR
 
     protected override JsonSerializerContext SerializerContext { get; } = new MonoSerializerContext();
 
-    protected sealed override IResult<IMonoResponse> HandleMessage(IMonoRequest<IMonoResponse> payload)
+    protected sealed override IResult<IMonoResponse> HandleRequest(IMonoRequest<IMonoResponse> payload)
     {
-        return payload.Visit(this);
+        return payload.Handle(this);
     }
 
-    public abstract Result<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request);
+    protected abstract Result<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request);
+
+    Result<GetMonoImageResponse> IMonoVisitor.GetMonoImage(GetMonoImageRequest request)
+    {
+        return GetMonoImage(request);
+    }
 }
