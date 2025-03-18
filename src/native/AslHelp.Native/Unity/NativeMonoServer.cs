@@ -1,5 +1,6 @@
 using System.IO;
 
+using AslHelp.Engines.Unity;
 using AslHelp.IO.Logging;
 using AslHelp.Ipc.Mono;
 using AslHelp.Ipc.Mono.Commands;
@@ -8,28 +9,30 @@ using AslHelp.Shared.Results;
 
 namespace AslHelp.Ipc.Native.Mono;
 
-internal sealed class NativeMonoServer(Logger? logger = null) : MonoServer(IpcConnection.PipeName, logger)
+internal sealed class NativeMonoServer(
+    IUnityApi api,
+    Logger? logger = null) : MonoServer("asl-help-ipc", logger)
 {
     protected override Result<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request)
     {
         Logger?.LogDetail($"Getting image '{request.Name}'...");
 
-        nuint address = Api.MonoImage.Loaded(
+        nint pImage = api.MonoImageLoaded(
             request.Name);
 
-        if (address == 0)
+        if (pImage == 0)
         {
             Logger?.LogDetail("  => Not found.");
             return GetMonoImageError.NotFound(request.Name);
         }
 
-        Logger?.LogDetail($"  => Success: 0x{address:X}.");
+        Logger?.LogDetail($"  => Success: 0x{pImage:X}.");
 
-        string fileName = Api.MonoImage.GetFileName(address);
+        string fileName = api.MonoImageGetFilename(pImage);
         string moduleName = Path.GetFileName(fileName);
 
         return new GetMonoImageResponse(
-            address,
+            pImage,
             request.Name,
             moduleName,
             fileName);
@@ -39,31 +42,31 @@ internal sealed class NativeMonoServer(Logger? logger = null) : MonoServer(IpcCo
     {
         Logger?.LogDetail($"Getting class '{request.Name}'...");
 
-        nuint address = Api.MonoClass.FromName(
-            (nuint)request.Image,
+        nint pClass = Api.MonoClass.FromName(
+            (nint)request.Image,
             request.Namespace,
             request.Name);
 
-        if (address == 0)
+        if (pClass == 0)
         {
             Logger?.LogDetail("  => Not found.");
             return GetMonoClassError.NotFound(request.Name);
         }
 
-        Logger?.LogDetail($"  => Success: 0x{address:X}.");
+        Logger?.LogDetail($"  => Success: 0x{pClass:X}.");
 
-        nuint vtableAddress = Api.MonoClass.GetVTable(address);
-        if (vtableAddress == 0)
+        nint pVTable = Api.MonoClass.GetVTable(pClass);
+        if (pVTable == 0)
         {
             Logger?.LogDetail("  => VTable null.");
             return GetMonoClassError.NotFound(request.Name);
         }
 
-        Logger?.LogDetail($"  => VTable: 0x{vtableAddress:X}.");
+        Logger?.LogDetail($"  => VTable: 0x{pVTable:X}.");
 
-        nuint staticFieldData = Api.MonoVTable.GetStaticFieldData(vtableAddress);
+        nint staticFieldData = Api.MonoVTable.GetStaticFieldData(pVTable);
         return new GetMonoClassResponse(
-            address,
+            pClass,
             staticFieldData);
     }
 
@@ -71,28 +74,28 @@ internal sealed class NativeMonoServer(Logger? logger = null) : MonoServer(IpcCo
     {
         Logger?.LogDetail($"Getting field '{request.Name}'...");
 
-        nuint address = Api.MonoField.FromName(
-            (nuint)request.Klass,
+        nint pField = Api.MonoField.FromName(
+            (nint)request.Klass,
             request.Name);
 
-        if (address == 0)
+        if (pField == 0)
         {
             Logger?.LogDetail("  => Not found.");
             return GetMonoFieldError.NotFound(request.Name);
         }
 
-        Logger?.LogDetail($"  => Success: 0x{address:X}.");
+        Logger?.LogDetail($"  => Success: 0x{pField:X}.");
 
-        nuint typeAddress = Api.MonoField.GetType(address);
-        if (typeAddress == 0)
+        nint pType = Api.MonoField.GetType(pField);
+        if (pType == 0)
         {
             Logger?.LogDetail("  => Type null.");
             return GetMonoFieldError.NotFound(request.Name);
         }
 
         return new GetMonoFieldResponse(
-            address,
-            Api.MonoField.GetOffset(address),
-            Api.MonoType.GetNameFull(typeAddress, MonoTypeNameFormat.Il));
+            pField,
+            Api.MonoField.GetOffset(pField),
+            Api.MonoType.GetNameFull(pType, MonoTypeNameFormat.Il));
     }
 }

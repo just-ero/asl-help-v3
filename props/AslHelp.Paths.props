@@ -4,7 +4,6 @@
     <RootPath>$(MSBuildThisFileDirectory)/..</RootPath>
 
     <ImplPath>$(RootPath)/impl</ImplPath>
-    <IpcPath>$(RootPath)/ipc</IpcPath>
     <LibPath>$(RootPath)/lib</LibPath>
     <SrcPath>$(RootPath)/src</SrcPath>
     <TestPath>$(RootPath)/test</TestPath>

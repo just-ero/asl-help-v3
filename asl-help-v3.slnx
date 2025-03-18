@@ -1,11 +1,5 @@
 <Solution>
 
-  <Folder Name="/ipc/">
-    <Project Path="ipc/AslHelp.Ipc/AslHelp.Ipc.csproj" />
-    <Project Path="ipc/AslHelp.Ipc.Mono/AslHelp.Ipc.Mono.csproj" />
-    <Project Path="ipc/AslHelp.Ipc.Native/AslHelp.Ipc.Native.csproj" />
-  </Folder>
-
   <Folder Name="/src/">
     <Project Path="src/AslHelp.Collections/AslHelp.Collections.csproj" />
     <Project Path="src/AslHelp.IO/AslHelp.IO.csproj" />
@@ -15,6 +9,17 @@
 
   <Folder Name="/src/engines/">
     <Project Path="src/engines/AslHelp.Engines/AslHelp.Engines.csproj" />
+    <Project Path="src/engines/AslHelp.Engines.Unity/AslHelp.Engines.Unity.csproj" />
+  </Folder>
+
+  <Folder Name="/src/ipc/">
+    <Project Path="src/ipc/AslHelp.Ipc/AslHelp.Ipc.csproj" />
+    <Project Path="src/ipc/AslHelp.Ipc.Mono/AslHelp.Ipc.Mono.csproj" />
+  </Folder>
+
+  <Folder Name="/src/native/">
+    <Project Path="src/native/AslHelp.Native/AslHelp.Native.csproj" />
+    <Project Path="src/native/AslHelp.Native.Interop/AslHelp.Native.Interop.csproj" />
   </Folder>
 
   <Folder Name="/test/">

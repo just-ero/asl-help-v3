@@ -4,7 +4,7 @@ using AslHelp.Shared.Results.Errors;
 namespace AslHelp.Ipc.Mono.Commands;
 
 public sealed record GetMonoFieldRequest(
-    ulong Klass,
+    long Klass,
     string Name) : IMonoRequest<GetMonoFieldResponse>
 {
     public IResult<GetMonoFieldResponse> Handle(IMonoVisitor visitor)
@@ -14,7 +14,7 @@ public sealed record GetMonoFieldRequest(
 }
 
 public sealed record GetMonoFieldResponse(
-    ulong Address,
+    long Address,
     uint Offset,
     string Type) : IMonoResponse;
 

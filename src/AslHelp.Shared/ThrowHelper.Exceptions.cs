@@ -71,6 +71,20 @@ public static partial class ThrowHelper
     }
 
     /// <summary>
+    ///     Throws a <see cref="DllNotFoundException"/> with a specified error message.
+    /// </summary>
+    /// <param name="message">The error message that explains the reason for the exception.</param>
+    /// <remarks>
+    ///     This method does not return and is not inlined to improve codegen of cold paths.
+    /// </remarks>
+    /// <exception cref="DllNotFoundException"/>
+    [DoesNotReturn]
+    public static void ThrowDllNotFoundException(string message)
+    {
+        throw new DllNotFoundException(message);
+    }
+
+    /// <summary>
     ///     Throws a <see cref="EndOfStreamException"/> with a specified error message.
     /// </summary>
     /// <param name="message">The error message that explains the reason for the exception.</param>
@@ -82,6 +96,20 @@ public static partial class ThrowHelper
     public static void ThrowEndOfStreamException(string message)
     {
         throw new EndOfStreamException(message);
+    }
+
+    /// <summary>
+    ///     Throws a <see cref="EntryPointNotFoundException"/> with a specified error message.
+    /// </summary>
+    /// <param name="message">The error message that explains the reason for the exception.</param>
+    /// <remarks>
+    ///     This method does not return and is not inlined to improve codegen of cold paths.
+    /// </remarks>
+    /// <exception cref="EntryPointNotFoundException"/>
+    [DoesNotReturn]
+    public static void ThrowEntryPointNotFoundException(string message)
+    {
+        throw new EntryPointNotFoundException(message);
     }
 
     /// <summary>

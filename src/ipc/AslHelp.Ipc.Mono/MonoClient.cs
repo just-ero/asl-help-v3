@@ -21,12 +21,12 @@ public sealed class MonoClient : IpcClient<IMonoRequest<IMonoResponse>, IMonoRes
         return Transmit<GetMonoImageResponse>(new GetMonoImageRequest(name));
     }
 
-    public Result<GetMonoClassResponse> GetMonoClass(ulong image, string @namespace, string name)
+    public Result<GetMonoClassResponse> GetMonoClass(long image, string @namespace, string name)
     {
         return Transmit<GetMonoClassResponse>(new GetMonoClassRequest(image, @namespace, name));
     }
 
-    public Result<GetMonoFieldResponse> GetMonoField(ulong klass, string name)
+    public Result<GetMonoFieldResponse> GetMonoField(long klass, string name)
     {
         return Transmit<GetMonoFieldResponse>(new GetMonoFieldRequest(klass, name));
     }

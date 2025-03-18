@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(IpcPath)/AslHelp.Ipc/AslHelp.Ipc.csproj" />
+    <ProjectReference Include="$(SrcPath)/AslHelp.Memory/AslHelp.Memory.csproj" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

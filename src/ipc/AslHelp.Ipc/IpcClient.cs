@@ -1,6 +1,8 @@
 using System;
 using System.IO.Pipes;
 using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 using AslHelp.Ipc.Errors;
 using AslHelp.Ipc.Serialization;
@@ -22,9 +24,19 @@ public abstract class IpcClient<TRequestPayloadBase, TResponsePayloadBase> : IDi
 
     protected abstract JsonSerializerContext SerializerContext { get; }
 
-    public void Connect()
+    public void Connect(int timeout = -1)
     {
-        _pipe.Connect();
+        _pipe.Connect(timeout);
+    }
+
+    public async Task ConnectAsync(CancellationToken ct = default)
+    {
+        await _pipe.ConnectAsync(ct);
+    }
+
+    public async Task ConnectAsync(int timeout, CancellationToken ct = default)
+    {
+        await _pipe.ConnectAsync(timeout, ct);
     }
 
     protected Result<TResponse> Transmit<TResponse>(TRequestPayloadBase request)
@@ -34,6 +46,31 @@ public abstract class IpcClient<TRequestPayloadBase, TResponsePayloadBase> : IDi
         IpcSerializer.Serialize(_pipe, requestMessage, SerializerContext);
 
         var res = IpcSerializer.Deserialize<IpcResponseMessage<TResponsePayloadBase>>(_pipe, SerializerContext);
+        if (res is null)
+        {
+            return IpcError.NullResponse;
+        }
+        else if (res.Data is TResponse data)
+        {
+            return data;
+        }
+        else if (res.Error is not null)
+        {
+            return IpcError.Other(res.Error);
+        }
+        else
+        {
+            return IpcError.NullResponse;
+        }
+    }
+
+    protected async Task<Result<TResponse>> TransmitAsync<TResponse>(TRequestPayloadBase request, CancellationToken ct = default)
+        where TResponse : TResponsePayloadBase
+    {
+        IpcRequestMessage<TRequestPayloadBase> requestMessage = new(request);
+        await IpcSerializer.SerializeAsync(_pipe, requestMessage, SerializerContext, ct);
+
+        var res = await IpcSerializer.DeserializeAsync<IpcResponseMessage<TResponsePayloadBase>>(_pipe, SerializerContext, ct);
         if (res is null)
         {
             return IpcError.NullResponse;

@@ -13,7 +13,7 @@ public sealed record GetMonoImageRequest(
 }
 
 public sealed record GetMonoImageResponse(
-    ulong Address,
+    long Address,
     string Name,
     string ModuleName,
     string FileName) : IMonoResponse;

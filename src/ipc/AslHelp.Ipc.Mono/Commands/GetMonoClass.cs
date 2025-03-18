@@ -4,7 +4,7 @@ using AslHelp.Shared.Results.Errors;
 namespace AslHelp.Ipc.Mono.Commands;
 
 public sealed record GetMonoClassRequest(
-    ulong Image,
+    long Image,
     string Namespace,
     string Name) : IMonoRequest<GetMonoClassResponse>
 {
@@ -15,8 +15,8 @@ public sealed record GetMonoClassRequest(
 }
 
 public sealed record GetMonoClassResponse(
-    ulong Address,
-    ulong StaticFieldData) : IMonoResponse;
+    long Address,
+    long StaticFieldData) : IMonoResponse;
 
 public sealed record GetMonoClassError : ResultError
 {

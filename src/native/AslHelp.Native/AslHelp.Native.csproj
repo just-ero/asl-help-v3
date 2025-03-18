@@ -13,8 +13,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(IpcPath)/AslHelp.Ipc.Mono/AslHelp.Ipc.Mono.csproj" />
-    <ProjectReference Include="$(SrcPath)/engines/AslHelp.Engines/AslHelp.Engines.csproj" />
+    <ProjectReference Include="$(SrcPath)/ipc/AslHelp.Ipc.Mono/AslHelp.Ipc.Mono.csproj" />
+    <ProjectReference Include="$(SrcPath)/native/AslHelp.Native.Interop/AslHelp.Native.Interop.csproj" />
+
+    <ProjectReference Include="$(SrcPath)/engines/AslHelp.Engines.Unity/AslHelp.Engines.Unity.csproj" />
   </ItemGroup>
 
 </Project>
