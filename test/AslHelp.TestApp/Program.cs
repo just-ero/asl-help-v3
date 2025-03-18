@@ -12,7 +12,7 @@ const string DllPath = @"C:\Users\Ero\Desktop\code\.just-ero\asl-help-v3\artifac
 using var game = Process.GetProcessesByName("ElenaTemple")[0];
 
 var dll = game.Inject(DllPath).Unwrap();
-var ret = dll.CallRemoteFunction(Cmd.StartServer, StartServerRequest.StartMonoServer)
+var ret = dll.CallRemoteFunction(nameof(Command.StartServer), StartServerRequest.StartMonoServer)
     .Map(code => Unsafe.As<uint, StartServerResponse>(ref code))
     .Unwrap();
 

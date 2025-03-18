@@ -11,14 +11,14 @@ namespace AslHelp.Ipc.Native;
 
 internal sealed unsafe partial class NativeApi
 {
-    private static readonly DebugLogger _logger = new();
+    private static readonly DebugLogger _logger = new() { OutputFormat = LogFormat.ShowMember | LogFormat.ShowLocation };
 
     private static NativeMonoServer? _monoServer;
 
-    [UnmanagedCallersOnly(EntryPoint = Cmd.StartServer)]
+    [UnmanagedCallersOnly(EntryPoint = nameof(Command.StartServer))]
     public static uint StartServer(StartServerRequest* request)
     {
-        _logger.LogDetail($"{Cmd.StartServer}({*request})");
+        _logger.LogDetail($"{nameof(Command.StartServer)}({*request})");
 
         try
         {

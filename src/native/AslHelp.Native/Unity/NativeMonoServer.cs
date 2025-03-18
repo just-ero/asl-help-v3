@@ -42,7 +42,7 @@ internal sealed class NativeMonoServer(
     {
         Logger?.LogDetail($"Getting class '{request.Name}'...");
 
-        nint pClass = Api.MonoClass.FromName(
+        nint pClass = api.MonoClassFromNameCase(
             (nint)request.Image,
             request.Namespace,
             request.Name);
@@ -55,7 +55,7 @@ internal sealed class NativeMonoServer(
 
         Logger?.LogDetail($"  => Success: 0x{pClass:X}.");
 
-        nint pVTable = Api.MonoClass.GetVTable(pClass);
+        nint pVTable = api.MonoClassVTable(api.MonoGetRootDomain(), pClass);
         if (pVTable == 0)
         {
             Logger?.LogDetail("  => VTable null.");

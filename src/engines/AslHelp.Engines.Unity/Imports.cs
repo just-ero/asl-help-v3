@@ -2,19 +2,26 @@ using System.Runtime.InteropServices;
 
 namespace AslHelp.Engines.Unity;
 
+// MonoDomain
+[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+public delegate nint MonoGetRootDomain();
+
 // MonoImage
 [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-public unsafe delegate nint MonoImageLoaded(string name);
+public delegate nint MonoImageLoaded(string name);
 
 [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-public unsafe delegate string MonoImageGetName(nint pImage);
+public delegate string MonoImageGetName(nint pImage);
 
 [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-public unsafe delegate string MonoImageGetFilename(nint pImage);
+public delegate string MonoImageGetFilename(nint pImage);
 
 // MonoClass
-[UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-public unsafe delegate nint MonoClassFromName(nint image, string name_space, string name);
+[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+public delegate nint MonoClassGet(nint image, uint typeToken);
 
-// [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-// public unsafe delegate nint MonoClassFromMonoType(nint image, nint type);
+[UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+public delegate nint MonoClassFromNameCase(nint image, string name_space, string name);
+
+[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+public delegate nint MonoClassVTable(nint domain, nint klass);

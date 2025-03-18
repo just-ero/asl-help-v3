@@ -4,8 +4,4 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="$(SrcPath)/AslHelp.Memory/AslHelp.Memory.csproj" PrivateAssets="all" />
-  </ItemGroup>
-
 </Project>
