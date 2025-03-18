@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
+using AslHelp.Engines;
 using AslHelp.IO.Logging;
 using AslHelp.Ipc.Native.Mono;
 
@@ -8,25 +8,29 @@ namespace AslHelp.Ipc.Native;
 
 internal static partial class Exports
 {
-    private static DebugLogger? _logger;
-    private static Task? _serverTask;
+    private static readonly DebugLogger _logger = new();
+    private static readonly NativeMonoServer _monoServer = new(_logger);
 
     [UnmanagedCallersOnly(EntryPoint = IpcConnection.EntryPoint)]
-    public static unsafe bool EntryPoint(int connectionType)
+    public static unsafe bool StartServer(Engine* gameEngine)
     {
-        if (_logger is not null)
+        switch (*gameEngine)
         {
-            _logger.LogDetail("IPC server already running.");
-            return false;
+            case Engine.Mono:
+            {
+                if (_monoServer.IsRunning)
+                {
+                    return true;
+                }
+
+                _logger.LogDetail("Starting Mono server.");
+                _ = _monoServer.RunAsync();
+
+                return true;
+            }
+            default:
+                _logger.LogCritical("Unknown engine.");
+                return false;
         }
-
-        _logger = new();
-        _logger.LogDetail("Starting IPC server...");
-
-        NativeMonoServer server = new(_logger);
-        _serverTask = server.RunAsync();
-
-        _logger.LogDetail("IPC server started.");
-        return true;
     }
 }

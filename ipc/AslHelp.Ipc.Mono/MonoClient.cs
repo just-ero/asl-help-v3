@@ -26,6 +26,11 @@ public sealed class MonoClient : IpcClient<IMonoRequest<IMonoResponse>, IMonoRes
         return Transmit<GetMonoClassResponse>(new GetMonoClassRequest(image, @namespace, name));
     }
 
+    public Result<GetMonoFieldResponse> GetMonoField(ulong klass, string name)
+    {
+        return Transmit<GetMonoFieldResponse>(new GetMonoFieldRequest(klass, name));
+    }
+
     Result<GetMonoClassResponse> IMonoVisitor.GetMonoClass(GetMonoClassRequest request)
     {
         return Transmit<GetMonoClassResponse>(request);
@@ -34,5 +39,10 @@ public sealed class MonoClient : IpcClient<IMonoRequest<IMonoResponse>, IMonoRes
     Result<GetMonoImageResponse> IMonoVisitor.GetMonoImage(GetMonoImageRequest request)
     {
         return Transmit<GetMonoImageResponse>(request);
+    }
+
+    Result<GetMonoFieldResponse> IMonoVisitor.GetMonoField(GetMonoFieldRequest request)
+    {
+        return Transmit<GetMonoFieldResponse>(request);
     }
 }

@@ -15,7 +15,8 @@ public sealed record GetMonoClassRequest(
 }
 
 public sealed record GetMonoClassResponse(
-    ulong Address) : IMonoResponse;
+    ulong Address,
+    ulong StaticFieldData) : IMonoResponse;
 
 public sealed record GetMonoClassError : ResultError
 {

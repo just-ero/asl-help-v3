@@ -77,7 +77,7 @@ public abstract class Logger
         [CallerFilePath] string file = "",
         [CallerLineNumber] int line = 0)
     {
-        Log(LoggerVerbosity.Info, message, member, file, line);
+        Log(LoggerVerbosity.Info, "[INFO] " + message, member, file, line);
     }
 
     public void LogWarning(
@@ -86,7 +86,7 @@ public abstract class Logger
         [CallerFilePath] string file = "",
         [CallerLineNumber] int line = 0)
     {
-        Log(LoggerVerbosity.Warning, message, member, file, line);
+        Log(LoggerVerbosity.Warning, "[WARN] " + message, member, file, line);
     }
 
     public void LogCritical(
@@ -95,6 +95,6 @@ public abstract class Logger
         [CallerFilePath] string file = "",
         [CallerLineNumber] int line = 0)
     {
-        Log(LoggerVerbosity.Critical, message, member, file, line);
+        Log(LoggerVerbosity.Critical, "[CRIT] " + message, member, file, line);
     }
 }

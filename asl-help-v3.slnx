@@ -13,6 +13,10 @@
     <Project Path="src/AslHelp.Shared/AslHelp.Shared.csproj" />
   </Folder>
 
+  <Folder Name="/src/engines/">
+    <Project Path="src/engines/AslHelp.Engines/AslHelp.Engines.csproj" />
+  </Folder>
+
   <Folder Name="/test/">
     <Project Path="test/AslHelp.Shared.Tests/AslHelp.Shared.Tests.csproj" />
     <Project Path="test/AslHelp.TestApp/AslHelp.TestApp.csproj" />

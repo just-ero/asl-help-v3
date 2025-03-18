@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(IpcPath)/AslHelp.Ipc.Mono/AslHelp.Ipc.Mono.csproj" />
+    <ProjectReference Include="$(SrcPath)/engines/AslHelp.Engines/AslHelp.Engines.csproj" />
   </ItemGroup>
 
 </Project>

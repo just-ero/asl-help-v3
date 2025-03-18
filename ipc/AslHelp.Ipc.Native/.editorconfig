@@ -1,0 +1,5 @@
+[Mono/**/*.cs]
+file_header_template = Generated from Unity 2017.1 Mono headers using ClangSharpPInvokeGenerator.\n\nhttps://github.com/Unity-Technologies/mono\nhttps://github.com/dotnet/ClangSharp
+
+[{Mono}/**/*.cs]
+dotnet_diagnostic.IDE0051.severity = none

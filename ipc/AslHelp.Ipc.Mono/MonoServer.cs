@@ -24,6 +24,7 @@ public abstract class MonoServer : IpcServer<IMonoRequest<IMonoResponse>, IMonoR
 
     protected abstract Result<GetMonoImageResponse> GetMonoImage(GetMonoImageRequest request);
     protected abstract Result<GetMonoClassResponse> GetMonoClass(GetMonoClassRequest request);
+    protected abstract Result<GetMonoFieldResponse> GetMonoField(GetMonoFieldRequest request);
 
     Result<GetMonoImageResponse> IMonoVisitor.GetMonoImage(GetMonoImageRequest request)
     {
@@ -33,5 +34,10 @@ public abstract class MonoServer : IpcServer<IMonoRequest<IMonoResponse>, IMonoR
     Result<GetMonoClassResponse> IMonoVisitor.GetMonoClass(GetMonoClassRequest request)
     {
         return GetMonoClass(request);
+    }
+
+    Result<GetMonoFieldResponse> IMonoVisitor.GetMonoField(GetMonoFieldRequest request)
+    {
+        return GetMonoField(request);
     }
 }

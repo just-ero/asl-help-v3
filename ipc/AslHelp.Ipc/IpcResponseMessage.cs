@@ -29,12 +29,7 @@ public sealed record IpcResponseMessage
 
     public static IpcResponseMessage<T> NullRequestMessage<T>()
     {
-        return new(Error: "Received null message.");
-    }
-
-    public static IpcResponseMessage<T> NullPayloadMessage<T>()
-    {
-        return new(Error: "Received message with null payload.");
+        return new(Error: "Received null request.");
     }
 }
 

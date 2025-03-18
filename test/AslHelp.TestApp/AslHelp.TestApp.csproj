@@ -9,6 +9,7 @@
     <ProjectReference Include="$(IpcPath)/AslHelp.Ipc/AslHelp.Ipc.csproj" />
     <ProjectReference Include="$(IpcPath)/AslHelp.Ipc.Mono/AslHelp.Ipc.Mono.csproj" />
     <ProjectReference Include="$(SrcPath)/AslHelp.Memory/AslHelp.Memory.csproj" />
+    <ProjectReference Include="$(SrcPath)/engines/AslHelp.Engines/AslHelp.Engines.csproj" />
   </ItemGroup>
 
 </Project>
