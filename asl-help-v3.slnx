@@ -7,19 +7,15 @@
     <Project Path="src/AslHelp.Shared/AslHelp.Shared.csproj" />
   </Folder>
 
-  <Folder Name="/src/engines/">
-    <Project Path="src/engines/AslHelp.Engines/AslHelp.Engines.csproj" />
-    <Project Path="src/engines/AslHelp.Engines.Unity/AslHelp.Engines.Unity.csproj" />
+  <Folder Name="/src/interop/">
+    <Project Path="src/interop/AslHelp.Interop/AslHelp.Interop.csproj" />
+    <Project Path="src/interop/AslHelp.Interop.Mono/AslHelp.Interop.Mono.csproj" />
+    <Project Path="src/interop/AslHelp.Interop.Native/AslHelp.Interop.Native.csproj" />
   </Folder>
 
   <Folder Name="/src/ipc/">
     <Project Path="src/ipc/AslHelp.Ipc/AslHelp.Ipc.csproj" />
     <Project Path="src/ipc/AslHelp.Ipc.Mono/AslHelp.Ipc.Mono.csproj" />
-  </Folder>
-
-  <Folder Name="/src/native/">
-    <Project Path="src/native/AslHelp.Native/AslHelp.Native.csproj" />
-    <Project Path="src/native/AslHelp.Native.Interop/AslHelp.Native.Interop.csproj" />
   </Folder>
 
   <Folder Name="/test/">

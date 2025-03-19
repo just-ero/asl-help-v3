@@ -7,11 +7,10 @@ namespace AslHelp.Shared.Results;
 
 public readonly struct Result<TValue> : IResult<TValue>
 {
-    private Result(TValue? value, IResultError? error, IResult? innerResult)
+    private Result(TValue? value, IResultError? error)
     {
         Value = value;
         Error = error;
-        InnerResult = innerResult;
 
         IsOk = Error is null;
         IsErr = Error is not null;
@@ -28,17 +27,16 @@ public readonly struct Result<TValue> : IResult<TValue>
     public TValue? Value { get; }
 
     public IResultError? Error { get; }
-    public IResult? InnerResult { get; }
 
     // Construction
     public static Result<TValue> Ok(TValue value)
     {
-        return new(value, default, default);
+        return new(value, default);
     }
 
-    public static Result<TValue> Err(IResultError error, IResult? innerResult = null)
+    public static Result<TValue> Err(IResultError error)
     {
-        return new(default, error, innerResult);
+        return new(default, error);
     }
 
     // Operators
@@ -98,7 +96,7 @@ public readonly struct Result<TValue> : IResult<TValue>
         where TOtherErr : IResultError
     {
         return IsErr
-            ? Result<TValue>.Err(op(Error), this)
+            ? Result<TValue>.Err(op(Error))
             : this;
     }
 
@@ -134,7 +132,7 @@ public readonly struct Result<TValue> : IResult<TValue>
     {
         if (!IsOk)
         {
-            string msg = $"Attempted to unwrap Ok: {this}";
+            string msg = $"Cannot unwrap value on Err result. ({Error})";
             ThrowHelper.ThrowInvalidOperationException(msg);
         }
 
@@ -153,7 +151,7 @@ public readonly struct Result<TValue> : IResult<TValue>
     {
         if (!IsErr)
         {
-            string msg = $"Attempted to unwrap Err: {this}";
+            string msg = $"Cannot unwrap error on Ok result.";
             ThrowHelper.ThrowInvalidOperationException(msg);
         }
 
@@ -197,17 +195,7 @@ public readonly struct Result<TValue> : IResult<TValue>
         }
         else
         {
-            if (InnerResult is not null)
-            {
-                return $"""
-                    Result<{typeof(TValue).FullName}>.Err({Error})
-                      -> {InnerResult}
-                    """;
-            }
-            else
-            {
-                return $"Result<{typeof(TValue).FullName}>.Err({Error})";
-            }
+            return $"Result<{typeof(TValue).FullName}>.Err({Error})";
         }
     }
 }

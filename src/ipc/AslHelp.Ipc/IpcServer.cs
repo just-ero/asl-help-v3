@@ -93,6 +93,8 @@ public abstract class IpcServer<TRequestPayloadBase, TResponsePayloadBase> : IDi
             Logger?.LogDetail("Connection closed.");
             _pipe.Disconnect();
         }
+
+        IsRunning = false;
     }
 
     protected abstract IResult<TResponsePayloadBase> HandleRequest(TRequestPayloadBase request);

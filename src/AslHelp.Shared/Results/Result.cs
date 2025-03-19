@@ -7,10 +7,9 @@ namespace AslHelp.Shared.Results;
 
 public readonly struct Result : IResult
 {
-    private Result(IResultError? error, IResult? innerResult)
+    private Result(IResultError? error)
     {
         Error = error;
-        InnerResult = innerResult;
 
         IsOk = Error is null;
         IsErr = Error is not null;
@@ -23,17 +22,16 @@ public readonly struct Result : IResult
     public bool IsErr { get; }
 
     public IResultError? Error { get; }
-    public IResult? InnerResult { get; }
 
     // Construction
     public static Result Ok()
     {
-        return new(default, default);
+        return new(default);
     }
 
-    public static Result Err(IResultError error, IResult? innerResult = null)
+    public static Result Err(IResultError error)
     {
-        return new(error, innerResult);
+        return new(error);
     }
 
     public static Result Combine(params IResult[] results)
@@ -101,7 +99,7 @@ public readonly struct Result : IResult
         where TError : IResultError
     {
         return IsErr
-            ? Err(op(Error), this)
+            ? Err(op(Error))
             : this;
     }
 
@@ -152,17 +150,7 @@ public readonly struct Result : IResult
         }
         else
         {
-            if (InnerResult is not null)
-            {
-                return $"""
-                    Result.Err({Error})
-                      -> {InnerResult}
-                    """;
-            }
-            else
-            {
-                return $"Result.Err({Error})";
-            }
+            return $"Result.Err({Error})";
         }
     }
 }

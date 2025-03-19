@@ -6,20 +6,16 @@ using AslHelp.Shared;
 
 namespace AslHelp.Ipc.Native;
 
-internal static class ImportResolver
+internal static class ExportResolver
 {
-    public static TDelegate Load<TDelegate>(nint handle, string entryPoint)
+    public static TDelegate GetExport<TDelegate>(nint handle, string entryPoint)
         where TDelegate : Delegate
     {
-        if (!NativeLibrary.TryGetExport(handle, entryPoint, out nint pImport))
-        {
-            ThrowHelper.ThrowEntryPointNotFoundException(entryPoint);
-        }
-
+        nint pImport = NativeLibrary.GetExport(handle, entryPoint);
         return Marshal.GetDelegateForFunctionPointer<TDelegate>(pImport);
     }
 
-    public static bool TryLoad<TDelegate>(nint handle, string entryPoint, [NotNullWhen(true)] out TDelegate? import)
+    public static bool TryGetExport<TDelegate>(nint handle, string entryPoint, [NotNullWhen(true)] out TDelegate? import)
         where TDelegate : Delegate
     {
         if (!NativeLibrary.TryGetExport(handle, entryPoint, out nint pImport))

@@ -12,5 +12,6 @@ internal sealed record IpcError : ResultError
         return new(message);
     }
 
+    public static IpcError ConnectionClosedByServer => new("Connection closed by server.");
     public static IpcError NullResponse => new("Received null response from server.");
 }

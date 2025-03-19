@@ -39,6 +39,24 @@ public static partial class ThrowHelper
         }
     }
 
+    public static void ThrowIfNull(
+        nint argument,
+        string? message = null,
+        [CallerArgumentExpression(nameof(argument))] string paramName = "")
+    {
+        if (argument == 0)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                ThrowArgumentNullException(paramName, "Value cannot be 0.");
+            }
+            else
+            {
+                ThrowArgumentNullException(paramName, message!);
+            }
+        }
+    }
+
     /// <summary>
     ///     Throws an <see cref="ArgumentNullException"/> if <paramref name="collection"/> is <see langword="null"/>,
     ///     or an <see cref="ArgumentException"/> if <paramref name="collection"/> is empty.

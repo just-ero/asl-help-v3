@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 using AslHelp.Ipc.Mono;
 using AslHelp.Memory.Extensions;
@@ -13,7 +12,7 @@ using var game = Process.GetProcessesByName("ElenaTemple")[0];
 
 var dll = game.Inject(DllPath).Unwrap();
 var ret = dll.CallRemoteFunction(nameof(Command.StartServer), StartServerRequest.StartMonoServer)
-    .Map(code => Unsafe.As<uint, StartServerResponse>(ref code))
+    .Map(code => (StartServerResponse)code)
     .Unwrap();
 
 Console.WriteLine(ret);
@@ -27,7 +26,10 @@ Console.WriteLine(image);
 var klass = client.GetMonoClass(image.Address, "", "GameProgress").Unwrap();
 Console.WriteLine(klass);
 
-var field = client.GetMonoField(klass.Address, "instance").Unwrap();
-Console.WriteLine(field);
+while (true)
+{
+    var field = client.GetMonoField(klass.Address, "instance").Unwrap();
+    Console.WriteLine(field);
+}
 
-dll.Eject();
+// dll.Eject();

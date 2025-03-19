@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.IO.Pipes;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -24,6 +25,8 @@ public abstract class IpcClient<TRequestPayloadBase, TResponsePayloadBase> : IDi
 
     protected abstract JsonSerializerContext SerializerContext { get; }
 
+    public bool IsConnected => _pipe.IsConnected;
+
     public void Connect(int timeout = -1)
     {
         _pipe.Connect(timeout);
@@ -42,50 +45,64 @@ public abstract class IpcClient<TRequestPayloadBase, TResponsePayloadBase> : IDi
     protected Result<TResponse> Transmit<TResponse>(TRequestPayloadBase request)
         where TResponse : TResponsePayloadBase
     {
-        IpcRequestMessage<TRequestPayloadBase> requestMessage = new(request);
-        IpcSerializer.Serialize(_pipe, requestMessage, SerializerContext);
+        try
+        {
+            IpcRequestMessage<TRequestPayloadBase> requestMessage = new(request);
+            IpcSerializer.Serialize(_pipe, requestMessage, SerializerContext);
 
-        var res = IpcSerializer.Deserialize<IpcResponseMessage<TResponsePayloadBase>>(_pipe, SerializerContext);
-        if (res is null)
-        {
-            return IpcError.NullResponse;
+            var res = IpcSerializer.Deserialize<IpcResponseMessage<TResponsePayloadBase>>(_pipe, SerializerContext);
+            if (res is null)
+            {
+                return IpcError.NullResponse;
+            }
+            else if (res.Data is TResponse data)
+            {
+                return data;
+            }
+            else if (res.Error is not null)
+            {
+                return IpcError.Other(res.Error);
+            }
+            else
+            {
+                return IpcError.NullResponse;
+            }
         }
-        else if (res.Data is TResponse data)
+        catch (IOException) when (!IsConnected)
         {
-            return data;
-        }
-        else if (res.Error is not null)
-        {
-            return IpcError.Other(res.Error);
-        }
-        else
-        {
-            return IpcError.NullResponse;
+            return IpcError.ConnectionClosedByServer;
         }
     }
 
     protected async Task<Result<TResponse>> TransmitAsync<TResponse>(TRequestPayloadBase request, CancellationToken ct = default)
         where TResponse : TResponsePayloadBase
     {
-        IpcRequestMessage<TRequestPayloadBase> requestMessage = new(request);
-        await IpcSerializer.SerializeAsync(_pipe, requestMessage, SerializerContext, ct);
+        try
+        {
+            IpcRequestMessage<TRequestPayloadBase> requestMessage = new(request);
+            await IpcSerializer.SerializeAsync(_pipe, requestMessage, SerializerContext, ct);
 
-        var res = await IpcSerializer.DeserializeAsync<IpcResponseMessage<TResponsePayloadBase>>(_pipe, SerializerContext, ct);
-        if (res is null)
-        {
-            return IpcError.NullResponse;
+            var res = await IpcSerializer.DeserializeAsync<IpcResponseMessage<TResponsePayloadBase>>(_pipe, SerializerContext, ct);
+            if (res is null)
+            {
+                return IpcError.NullResponse;
+            }
+            else if (res.Data is TResponse data)
+            {
+                return data;
+            }
+            else if (res.Error is not null)
+            {
+                return IpcError.Other(res.Error);
+            }
+            else
+            {
+                return IpcError.NullResponse;
+            }
         }
-        else if (res.Data is TResponse data)
+        catch (IOException) when (!IsConnected)
         {
-            return data;
-        }
-        else if (res.Error is not null)
-        {
-            return IpcError.Other(res.Error);
-        }
-        else
-        {
-            return IpcError.NullResponse;
+            return IpcError.ConnectionClosedByServer;
         }
     }
 

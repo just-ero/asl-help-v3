@@ -2,14 +2,11 @@ using System;
 using System.Runtime.InteropServices;
 
 using AslHelp.IO.Logging;
-using AslHelp.Ipc.Native.Mono;
-using AslHelp.Ipc.Native.Unity;
-using AslHelp.Native.Interop;
-using AslHelp.Native.Interop.Commands;
+using AslHelp.Ipc.Mono;
 
-namespace AslHelp.Ipc.Native;
+namespace AslHelp.Interop.Native;
 
-internal sealed unsafe partial class NativeApi
+public static class NativeCommandExports
 {
     private static readonly DebugLogger _logger = new()
     {
@@ -17,41 +14,41 @@ internal sealed unsafe partial class NativeApi
         Verbosity = LoggerVerbosity.Detailed
     };
 
-    private static NativeMonoServer? _monoServer;
+    private static MonoServer? _monoServer;
 
-    [UnmanagedCallersOnly(EntryPoint = nameof(Command.StartServer))]
-    public static StartServerResponse StartServer(StartServerRequest* request)
+    [UnmanagedCallersOnly(EntryPoint = Commands.StartServer.Uid)]
+    public static unsafe Commands.StartServer.ExitCode StartServer(Commands.StartServer.Command* command)
     {
-        _logger.LogDetail($"Received request '{*request}' for {nameof(Command.StartServer)}.");
+        _logger.LogDetail($"Received '{*command}' for {Commands.StartServer.Uid}.");
 
         try
         {
-            switch (*request)
+            switch (*command)
             {
-                case StartServerRequest.StartMonoServer:
+                case Commands.StartServer.Command.StartMonoServer:
                 {
-                    return StartMono();
+                    return StartMonoServer();
                 }
                 default:
                 {
-                    _logger.LogCritical($"Unknown request: {*request}");
-                    return StartServerResponse.RequestUnknown;
+                    _logger.LogCritical($"Unknown argument '{*command}' for {Commands.StartServer.Uid}.");
+                    return Commands.StartServer.ExitCode.RequestUnknown;
                 }
             }
         }
         catch (Exception ex)
         {
             _logger.LogCritical($"Unhandled exception: {ex}");
-            return StartServerResponse.UnhandledException;
+            return Commands.StartServer.ExitCode.UnhandledException;
         }
     }
 
-    private static StartServerResponse StartMono()
+    private static Commands.StartServer.ExitCode StartMono()
     {
         if (_monoServer is { IsRunning: true })
         {
             _logger.LogDetail("Server already running.");
-            return StartServerResponse.Ok;
+            return Commands.StartServer.ExitCode.Ok;
         }
 
         _logger.LogDetail("Searching for compatible library...");
@@ -64,7 +61,7 @@ internal sealed unsafe partial class NativeApi
             _monoServer = new(api, _logger);
             _ = _monoServer.RunAsync();
 
-            return StartServerResponse.Ok;
+            return Commands.StartServer.ExitCode.Ok;
         }
         else if (NativeLibrary.TryLoad("mono-2.0-bdwgc.dll", out hModule))
         {
@@ -74,12 +71,12 @@ internal sealed unsafe partial class NativeApi
             _monoServer = new(api, _logger);
             _ = _monoServer.RunAsync();
 
-            return StartServerResponse.Ok;
+            return Commands.StartServer.ExitCode.Ok;
         }
         else
         {
             _logger.LogCritical("Failed to load 'mono' library.");
-            return StartServerResponse.LibraryNotFound;
+            return Commands.StartServer.ExitCode.MonoLibraryNotFound;
         }
     }
 }

@@ -1,52 +1,45 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace AslHelp.IO.Logging;
 
 public abstract class Logger
 {
     public LoggerVerbosity Verbosity { get; set; }
-#if DEBUG
-        = LoggerVerbosity.Detailed;
-#endif
-
-    public LogFormat OutputFormat { get; set; }
-#if DEBUG
-        = LogFormat.ShowTimestamp | LogFormat.ShowMember | LogFormat.ShowLocation;
-#endif
+    public LogFormatOptions OutputFormat { get; set; }
 
     protected abstract void WriteLine(string output);
 
     private void LogInternal(string message, string member, string file, int line)
     {
-        if ((OutputFormat & LogFormat.ShowTimestamp) != 0)
+        StringBuilder outputBuilder = new();
+
+        if ((OutputFormat & LogFormatOptions.ShowTimestamp) != 0)
         {
-            WriteLine($"[{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss.fff}] {message}");
-        }
-        else
-        {
-            WriteLine(message);
+            outputBuilder.Append($"[{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss.fff}] ");
         }
 
-        if ((OutputFormat & LogFormat.ShowMember) != 0)
+        outputBuilder.Append(message);
+
+        if ((OutputFormat & LogFormatOptions.ShowMember) != 0)
         {
-            if ((OutputFormat & LogFormat.ShowLocation) != 0)
+            if ((OutputFormat & LogFormatOptions.ShowLocation) != 0)
             {
-                WriteLine($"                             in {member} at {Path.GetFileName(file)}:{line}");
+                outputBuilder.Append($" [{member} @ {Path.GetFileName(file)}:{line}]");
             }
             else
             {
-                WriteLine($"                             in {member}");
+                outputBuilder.Append($" [{member}]");
             }
         }
-        else
+        else if ((OutputFormat & LogFormatOptions.ShowLocation) != 0)
         {
-            if ((OutputFormat & LogFormat.ShowLocation) != 0)
-            {
-                WriteLine($"                             at {Path.GetFileName(file)}:{line}");
-            }
+            outputBuilder.Append($" [@ {Path.GetFileName(file)}:{line}]");
         }
+
+        WriteLine(outputBuilder.ToString());
     }
 
     public void Log(

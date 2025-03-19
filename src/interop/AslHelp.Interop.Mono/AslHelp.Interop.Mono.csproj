@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(SrcPath)/engines/AslHelp.Engines/AslHelp.Engines.csproj" />
+    <ProjectReference Include="$(SrcPath)/interop/AslHelp.Interop/AslHelp.Interop.csproj" />
   </ItemGroup>
 
 </Project>
